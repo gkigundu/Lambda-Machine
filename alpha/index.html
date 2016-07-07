@@ -5,16 +5,21 @@
 	<title>Lambda Machine</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script type="text/javascript">
-	
+	function postData(){
+		var postForm = document.getElementById('postForm');
+		var fileNameInput = document.getElementById('fileNameInput').value.replace(/^.*[\\\/]/, '');
+		postForm.setAttribute("action",postForm.getAttribute("action") + fileNameInput);
+		postForm.submit()
+	}
 	</script>
 </head>
 
 <body>
   <br/><br/><br/><br/><br/>
-  <form method="post" action='/codeScrolls/'>
-    <input type="file" name="fileName"><br>
-    <input type="submit" value="Submit">
+  <form method="post" id="postForm" action='/codeScrolls/'>
+    <input type="file" id="fileNameInput"><br>
   </form>
+	<button onclick="postData()">Submit</button>
 </body>
 
 </html>

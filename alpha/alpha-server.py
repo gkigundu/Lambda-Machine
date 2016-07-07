@@ -3,7 +3,7 @@
 import http.server
 import socketserver
 import signal
-import sys, os, re
+import sys, os, re, cgi
 
 # Global Defaults
 port    = 8000
@@ -14,7 +14,7 @@ args=sys.argv[1:]
 for i in range(len(args)):
   if (args[i] == "-p"):
     port = int(args[i+1])
-    
+
 # checks
 if not os.path.exists(codeDir):
     os.makedirs(codeDir)
@@ -24,7 +24,7 @@ class handler(http.server.BaseHTTPRequestHandler):
       self.send_response(code)
       self.send_header(b'Content-type', 'text/html')
       self.end_headers()
-      
+
     # GET
     def do_GET(self): # check if contained to directory
       filePath=re.sub("^/",os.getcwd()+"/",self.path)
@@ -36,7 +36,6 @@ class handler(http.server.BaseHTTPRequestHandler):
         f.close
       elif os.path.isdir(filePath):
         index=os.path.join(filePath,"index.html")
-        print(index)
         if os.path.isfile(index):
           self.set_headers(200)
           f = open(index, 'r')
@@ -55,11 +54,12 @@ class handler(http.server.BaseHTTPRequestHandler):
         self.set_headers(500)
     # POST
     def do_POST(self):
+        fp=self.rfile
+        length = int(self.headers.get_all('content-length')[0])
+        headers=self.headers
         self.set_headers(200)
-        data = self.rfile.read(int(self.headers.get_all('content-length')[0])).decode("UTF-8")
-        print(data)
-        f = open (os.path.join(codeDir, self.path) ,'w')
-        f.write(data.decode("UTF-8"))
+        f = open("test", 'wb')
+        f.write(fp.read(length))
         f.close()
     def do_DELETE(self):
         self._set_headers()
@@ -73,4 +73,3 @@ try:
   httpd.serve_forever()
 except KeyboardInterrupt:
   sys.exit(0)
-    
