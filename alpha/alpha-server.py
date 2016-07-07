@@ -24,7 +24,9 @@ class handler(http.server.BaseHTTPRequestHandler):
       self.send_response(code)
       self.send_header(b'Content-type', 'text/html')
       self.end_headers()
-    def do_GET(self): # fix to only server from lower directory
+      
+    # GET
+    def do_GET(self): # check if contained to directory
       filePath=re.sub("^/",os.getcwd()+"/",self.path)
       if os.path.isfile(filePath):
         self.set_headers(200)
@@ -51,10 +53,12 @@ class handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(string.encode("UTF-8"))
       else:
         self.set_headers(500)
+    # POST
     def do_POST(self):
         self.set_headers(200)
-        data = self.rfile.read(int(self.headers.get_all('content-length')[0]))
-        f = open ("code/" + self.path,'w')
+        data = self.rfile.read(int(self.headers.get_all('content-length')[0])).decode("UTF-8")
+        print(data)
+        f = open (os.path.join(codeDir, self.path) ,'w')
         f.write(data.decode("UTF-8"))
         f.close()
     def do_DELETE(self):
