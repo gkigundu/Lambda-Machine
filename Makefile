@@ -8,5 +8,4 @@ viewChanges:
 updateGit:
 	git add .
 	git commit
-	git push --repo=git@github.com:XDerekMaierX/BashTools.git
-
+	git push --repo=git@github.com:XDerekMaierX/Lambda-Machine.git -q
