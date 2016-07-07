@@ -3,7 +3,8 @@
 import http.server
 import socketserver
 import signal
-import sys, os, re, cgi
+import sys, os, re
+import cgi
 
 # Global Defaults
 port    = 8000
@@ -53,14 +54,21 @@ class handler(http.server.BaseHTTPRequestHandler):
       else:
         self.set_headers(500)
     # POST
-    def do_POST(self):
+    def do_POST(self): #### working, need to get binary post data using multipart/form-data 
         fp=self.rfile
+        form = cgi.FieldStorage() # ??
+        print(form)
+        user = form.getfirst("user", "").upper()   #??
+        for item in form.getlist("item"):#??
+            print(item) #??
         length = int(self.headers.get_all('content-length')[0])
+        print(length)
         headers=self.headers
         self.set_headers(200)
-        f = open("test", 'wb')
-        f.write(fp.read(length))
-        f.close()
+        if(length > 0):
+            f = open("test", 'wb')
+            f.write(fp.read(length))
+            f.close()
     def do_DELETE(self):
         self._set_headers()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
