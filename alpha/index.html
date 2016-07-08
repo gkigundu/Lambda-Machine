@@ -26,13 +26,14 @@
 					var xhr = new XMLHttpRequest;
 					xhr.open("POST", "/codeScrolls/" + fileName , false);
 					xhr.send(f.target.result);
+					getScriptListing();
 				};
 			})(f);
 			reader.readAsText(f);
 		}
 	}
 	function init(){
-		document.getElementById('fileNameInput').addEventListener('change', postTextFile, false);
+		document.getElementById('fileInputButton').addEventListener('change', postTextFile, false);
 		checkAPIsupport();
 		getScriptListing();
 	}
@@ -40,6 +41,12 @@
 		var xhr = new XMLHttpRequest;
 		xhr.open("GET", "/codeScrolls/", false);
 		xhr.send();
+		hierarchyTree = document.getElementById('r2c1');
+		if(xhr.status == 200){
+			hierarchyTree.innerHTML = xhr.response;
+		}else{
+			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
+		}
 	}
 	//  =====================
 	//  	END Javascript
@@ -48,15 +55,15 @@
 </head>
 
 <body>
-	<div class="r1">
+	<div id="r1">
 	</div>
-	<div class="r2">
-		<div class="r2c1">
+	<div id="r2">
+		<div id="r2c1">
 		</div>
-		<div class="r2c2">
-			<div class="fileInputButtonDiv">
-				<p class="fileInputButtonP">Drop a script or click here to upload!</p>
-				<input type="file" id="fileNameInput" class="fileInputButton">
+		<div id="r2c2">
+			<div id="fileInputButtonDiv">
+				<p id="fileInputButtonP">Drop a script or click here to upload!</p>
+				<input type="file" id="fileInputButton">
 			</div>
 		</div>
 	</div>

@@ -9,20 +9,20 @@ div{
   padding: 0px;
 }
 /* Upload Button */
-.fileInputButton{
+#fileInputButton{
   width: 100%;
   height: 100%;
   overflow: hidden;
   opacity: 0;
 }
-.fileInputButtonDiv{
+#fileInputButtonDiv{
   background-color: #428F89;
   margin-left:auto;
   margin-right:auto;
   width: 100%;
   height: 50px;
 }
-.fileInputButtonP {
+#fileInputButtonP {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -36,7 +36,7 @@ div{
     text-align: center;
 }
 /* Main Divs */
-.r1{ /*title bar*/
+#r1{ /*title bar*/
   background-color: #B08B0D;
   position: fixed;
   top: 0px;
@@ -44,14 +44,14 @@ div{
   height: 10vh;
   width:  100%;
 }
-.r2{ /*container for hierarcy and main container*/
+#r2{ /*container for hierarcy and main container*/
   position: fixed;
   top: 10vh;
   left: 0px;
   height: 90vh;
   width:  100%;
 }
-.r2c1{ /*hierarcy*/
+#r2c1{ /*hierarcy*/
   background-color: #97282C;
   position: fixed;
   top: 10vh;
@@ -59,7 +59,7 @@ div{
   height: 100%;
   width:  30vw;
 }
-.r2c2{ /*main container*/
+#r2c2{ /*main container*/
   background-color: #805489;
   position: fixed;
   top: 10vh;
