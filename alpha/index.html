@@ -6,19 +6,25 @@
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script type="text/javascript">
 	function postData(){
-		var postForm = document.getElementById('postForm');
 		var fileNameInput = document.getElementById('fileNameInput').value.replace(/^.*[\\\/]/, '');
-		postForm.setAttribute("action",postForm.getAttribute("action") + fileNameInput);
-		postForm.submit();
+		http.open("POST", fileNameInput, true);
+		http.setRequestHeader("Content-type", "binary/octet-stream");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.onreadystatechange = function() {//Call a function when the state changes.
+			if(http.readyState == 4 && http.status == 200) {
+				alert(http.responseText);
+			}
+		}
+		http.send(params);
 	}
 	</script>
 </head>
 
 <body>
   <br/><br/><br/><br/><br/>
-  <form method="post" id="postForm" action='/codeScrolls/'>
-    <input type="file" enctype='multipart/form-data' id="fileNameInput"><br>
-  </form>
+  <input type="file" enctype='multipart/form-data' id="fileNameInput"><br>
 	<button onclick="postData()">Submit</button>
 </body>
 

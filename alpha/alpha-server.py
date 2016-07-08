@@ -1,10 +1,18 @@
 #!/bin/env python3
 
+# Difficulties:
+#     posting data to server using a form
+
+
 import http.server
 import socketserver
 import signal
 import sys, os, re
 import cgi
+
+# debuging
+import cgitb
+cgitb.enable()
 
 # Global Defaults
 port    = 8000
@@ -54,21 +62,31 @@ class handler(http.server.BaseHTTPRequestHandler):
       else:
         self.set_headers(500)
     # POST
-    def do_POST(self): #### working, need to get binary post data using multipart/form-data 
+    def do_POST(self): #### working, need to get binary post data using multipart/form-data
         fp=self.rfile
-        form = cgi.FieldStorage() # ??
-        print(form)
-        user = form.getfirst("user", "").upper()   #??
-        for item in form.getlist("item"):#??
-            print(item) #??
         length = int(self.headers.get_all('content-length')[0])
         print(length)
-        headers=self.headers
         self.set_headers(200)
         if(length > 0):
             f = open("test", 'wb')
             f.write(fp.read(length))
             f.close()
+        self.redirect("/")
+    def redirect(self, dest):
+        html1='''
+            <!DOCTYPE HTML>
+            <html lang="en-US">
+             <head>
+                <meta charset="UTF-8">
+                <script type="text/javascript">
+                   window.location = " '''
+        html2=''' ";
+               </script>
+            </head>
+            </html>
+        '''
+        html = html1 + dest + html2
+        self.wfile.write(html.encode("UTF-8"))
     def do_DELETE(self):
         self._set_headers()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
