@@ -5,27 +5,46 @@
 	<title>Lambda Machine</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<script type="text/javascript">
-	function postData(){
-		var fileNameInput = document.getElementById('fileNameInput').value.replace(/^.*[\\\/]/, '');
-		http.open("POST", fileNameInput, true);
-		http.setRequestHeader("Content-type", "binary/octet-stream");
-		http.setRequestHeader("Content-length", params.length);
-		http.setRequestHeader("Connection", "close");
-
-		http.onreadystatechange = function() {//Call a function when the state changes.
-			if(http.readyState == 4 && http.status == 200) {
-				alert(http.responseText);
-			}
+	//  =====================
+	//  	START Javascript
+	//  =====================
+	function checkAPIsupport(){
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+		} else {
+			alert('The File APIs are not fully supported in this browser.');
 		}
-		http.send(params);
 	}
+	function postTextFile(evt){
+		var f = evt.target.files[0];
+		fileName = f.name;
+		if (!f) {
+			alert("Failed to load file");
+		} else {
+			var reader = new FileReader();
+			reader.onload = (function(f) {
+				return function(f) {
+					var xhr = new XMLHttpRequest;
+					xhr.open("POST", "/codeScrolls/" + fileName , false);
+					xhr.send(f.target.result);
+				};
+			})(f);
+			reader.readAsText(f)
+		}
+	}
+	function init(){
+		document.getElementById('fileNameInput').addEventListener('change', postTextFile, false);
+		checkAPIsupport();
+	}
+	//  =====================
+	//  	END Javascript
+	//  =====================
 	</script>
 </head>
 
 <body>
-  <br/><br/><br/><br/><br/>
-  <input type="file" enctype='multipart/form-data' id="fileNameInput"><br>
-	<button onclick="postData()">Submit</button>
+	<br/><br/><br/><br/><br/>
+	<input type="file" id="fileNameInput"><br>
+	<script> init();	</script>
 </body>
 
 </html>

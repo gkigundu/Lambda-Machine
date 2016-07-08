@@ -62,13 +62,14 @@ class handler(http.server.BaseHTTPRequestHandler):
       else:
         self.set_headers(500)
     # POST
-    def do_POST(self): #### working, need to get binary post data using multipart/form-data
+    def do_POST(self):
         fp=self.rfile
+        filePath=re.sub("^/",os.getcwd()+"/",self.path)
         length = int(self.headers.get_all('content-length')[0])
         print(length)
         self.set_headers(200)
         if(length > 0):
-            f = open("test", 'wb')
+            f = open(filePath, 'wb')
             f.write(fp.read(length))
             f.close()
         self.redirect("/")
