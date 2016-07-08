@@ -22,13 +22,18 @@ div{
   width: 100%;
   height: 50px;
 }
-.unselectable {
+.fileInputButtonP {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    padding: 0px;
+    text-align: center;
 }
 /* Main Divs */
 .r1{ /*title bar*/

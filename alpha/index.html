@@ -28,12 +28,18 @@
 					xhr.send(f.target.result);
 				};
 			})(f);
-			reader.readAsText(f)
+			reader.readAsText(f);
 		}
 	}
 	function init(){
 		document.getElementById('fileNameInput').addEventListener('change', postTextFile, false);
 		checkAPIsupport();
+		getScriptListing();
+	}
+	function getScriptListing(){ // working
+		var xhr = new XMLHttpRequest;
+		xhr.open("GET", "/codeScrolls/", false);
+		xhr.send();
 	}
 	//  =====================
 	//  	END Javascript
@@ -49,7 +55,7 @@
 		</div>
 		<div class="r2c2">
 			<div class="fileInputButtonDiv">
-				<p style="position: absolute; top: 0px; width: 100%; padding: 0px;text-align: center;" >Drop a script or click here to upload!</p>
+				<p class="fileInputButtonP">Drop a script or click here to upload!</p>
 				<input type="file" id="fileNameInput" class="fileInputButton">
 			</div>
 		</div>

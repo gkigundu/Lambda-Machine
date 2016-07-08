@@ -1,0 +1,53 @@
+#!/bin/bash
+
+
+# Author            : Derek Maier
+# Date Created      : 21 June 2016
+# Last Revision     : 21 June 2016
+# Version           : 0.1
+
+# ====================
+#   Description
+# ====================
+# Quick generate a file hierarchy for ssh and sftp based upon the listing below.
+# I developed this to create a structure that I could use to quickly connect to 
+# my servers. You can use tab complete from a terminal to quickly find the 
+# server you need. Move this file to the location where you want to generate the 
+# files.
+
+# IMPORTANT: This script will remove any files in the directory that is not
+#            prefixed with an underscore (_).
+
+file='''
+#name           user    destination        port
+chicago         derk    198.46.157.131                  666
+#ssh derk@198.46.157.131 -p 666 -t -t "ssh zodiak@10.8.0.2 -p 666"
+lilHP           zodiak  24.159.108.126                  666
+ovh             derk    158.69.215.21                   22
+ksuWeb          dmaier  studentweb.kennesaw.edu
+'''
+
+
+file=$(echo "$file" | sed 's@#.*@@g' | grep -v '^[[:space:]]*$' )
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+rm $(find $DIR -type f | grep -v "$DIR/_" | tr '\n' ' ')
+
+if [ ! -d "$DIR/ftp" ]; then
+        mkdir $DIR/ftp
+fi
+
+echo "$file" | while read x ; do
+        fileName=$(echo $x | awk '{print $1}')
+        user=$(echo $x | awk '{print $2}')
+        dest=$(echo $x | awk '{print $3}')
+        port=$(echo $x | awk '{print $4}')
+        if [ "$port" == "" ]; then
+                port="22"
+        fi
+        echo "#!/bin/bash" > $DIR/$fileName.sh
+        echo "ssh $user@$dest -p $port" >> $DIR/$fileName.sh
+        echo "#!/bin/bash" > $DIR/ftp/$fileName.sh
+        echo "sftp -P $port $user@$dest " >> $DIR/ftp/$fileName.sh
+done
