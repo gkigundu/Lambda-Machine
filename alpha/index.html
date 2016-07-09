@@ -8,39 +8,59 @@
 	//  =====================
 	//  	START Javascript
 	//  =====================
+	// Checks that required APIs are operational in browser
 	function checkAPIsupport(){
+		log("Checking API support")
 		if (window.File && window.FileReader && window.FileList && window.Blob) {
 		} else {
 			alert('The File APIs are not fully supported in this browser.');
 		}
+		log("Checking API support finished")
 	}
+	// posts a file to the Python web server
 	function postFile(evt){
+		log("Posting File ");
 		var f = evt.target.files[0];
 		fileName = f.name;
-		console.log(fileName);
+		log("File Name : " + fileName);
 		if (!f) {
 			alert("Failed to load file");
+			error("Failed to load file")
 		} else {
 			var reader = new FileReader();
 			reader.onload = (function(f) {
 				return function(f) {
 					var xhr = new XMLHttpRequest;
+					log("Posting request")
 					xhr.open("POST", "/codeScrolls/" + fileName , false);
-					console.
-					dir(xhr)
+					log("Sending request")
 					xhr.send(f.target.result); // it seems chrome only supports xhr.send which only sends strings. No binary data.
 					getScriptListing();
 				};
 			})(f);
 			reader.readAsBinaryString(f);
 		}
+		log("Posting File finished");
 	}
+	// initializes javascript after the required HTML elements are in place
 	function init(){
+		log("Initializing");
 		document.getElementById('fileInputButton').addEventListener('change', postFile, false);
 		checkAPIsupport();
 		getScriptListing();
+		log("Initializing finished");
 	}
-	function view(fileName){
+	// console.log
+	function log(str){
+			console.log("<Log> " + str);
+	}
+	// consloe.error
+	function error(str){
+			console.error("<ERROR> " + str);
+	}
+	// called when the eye is clicked. This updates the content view div with the file's content.
+	function contentView(fileName){
+		log("Updating Content View");
 		var hierarchyTree = document.getElementById('r2c1');
 		var rows = hierarchyTree.childNodes[0].getElementsByTagName("tr");
 		for (i = 0; i < rows.length; i++) {
@@ -50,12 +70,20 @@
 		elem.style.backgroundColor = "lightBlue";
 
 		var xhr = new XMLHttpRequest;
+		log("Sending request for file content view");
 		xhr.open("GET", "/codeScrolls/" + fileName, false);
 		xhr.send();
 		var contentView = document.getElementById('contentView')
 		contentView.innerHTML = "<pre>" + xhr.response + "</pre>"
+		log("request for content view finished");
 	}
+	// called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
+	function run(fileName){
+		log("getting content view for running '" + fileName + "'");
+	}
+	// updates the heirarchy view with the scripts found in the python server's codescrolls directory
 	function getScriptListing(){
+		log("Getting script listing");
 		var xhr = new XMLHttpRequest;
 		xhr.open("GET", "/codeScrolls/", false);
 		xhr.send();
@@ -64,6 +92,7 @@
 			hierarchyTree.innerHTML = xhr.response;
 			var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
 			if(aList.length > 0){
+				log("Found more then zero listings. Updating hierarchy view")
 				var newHierarchyTree = document.createElement("table");
 				for (i = 0; i < aList.length; i++) {
 					var tr  = document.createElement("tr")
@@ -74,7 +103,6 @@
 					tr.appendChild(td2);
 					tr.appendChild(td3);
 					newHierarchyTree.appendChild(tr)
-
 					// create nodes
 					var text = document.createElement("p");
 					var view = document.createElement("img");
@@ -90,15 +118,16 @@
 					run .setAttribute("height", imgSize);
 					view.setAttribute("width", imgSize);
 					view.setAttribute("height", imgSize);
-					run .setAttribute("onclick", "run ('" + aList[i].innerHTML + "')");
-					view.setAttribute("onclick", "view('" + aList[i].innerHTML + "')");
+					run .setAttribute("onclick", "run        ('" + aList[i].innerHTML + "')");
+					view.setAttribute("onclick", "contentView('" + aList[i].innerHTML + "')");
 					text.innerHTML = aList[i].innerHTML;
-					// append nodes.
+					// append nodes
 					td1.appendChild(view);
 					td2.appendChild(run );
 					td3.appendChild(text);
 				}
 				while (hierarchyTree.firstChild) {
+					log("Cleaning pre existing hierarchy tree")
 					hierarchyTree.removeChild(hierarchyTree.firstChild);
 				}
 				hierarchyTree.appendChild(newHierarchyTree);
@@ -106,8 +135,10 @@
 				hierarchyTree.innerHTML = "<p style='text-align:center'>Uploaded Files Will Appear Here.</p>"
 			}
 		}else{
+			error("Could not contact Server.")
 			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
 		}
+		log("finished getting script listing");
 	}
 	//  =====================
 	//  	END Javascript

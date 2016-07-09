@@ -9,6 +9,7 @@
 #       delete files
 #       allow user to upload file with really long name that's all one word
 #            Like : ThisIsAReallyLongName.WhoNamesSomethingLikeThis.why
+#       run file content view
 
 # notes
 #       uploads and downloads appear solid
@@ -111,7 +112,6 @@ class handler(http.server.BaseHTTPRequestHandler):
     def do_DELETE(self):
         self._setHeaders()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
-
 # run server
 socketserver.TCPServer.allow_reuse_address = True
 httpd = socketserver.TCPServer((addr, port), handler)
