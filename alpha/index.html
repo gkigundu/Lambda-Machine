@@ -47,6 +47,7 @@
 			rows[i].style.backgroundColor = "";
 		}
 		var elem = document.getElementById(fileName);
+		elem.style.backgroundColor = "lightBlue";
 
 		var xhr = new XMLHttpRequest;
 		xhr.open("GET", "/codeScrolls/" + fileName, false);
