@@ -14,7 +14,7 @@
 			alert('The File APIs are not fully supported in this browser.');
 		}
 	}
-	function postTextFile(evt){
+	function postFile(evt){
 		var f = evt.target.files[0];
 		fileName = f.name;
 		if (!f) {
@@ -25,25 +25,37 @@
 				return function(f) {
 					var xhr = new XMLHttpRequest;
 					xhr.open("POST", "/codeScrolls/" + fileName , false);
-					xhr.send(f.target.result);
+					console.
+					dir(xhr)
+					xhr.send(f.target.result); // it seems chrome only supports xhr.send which only sends strings. No binary data.
 					getScriptListing();
 				};
 			})(f);
-			reader.readAsText(f);
+			reader.readAsBinaryString(f);
 		}
 	}
 	function init(){
-		document.getElementById('fileInputButton').addEventListener('change', postTextFile, false);
+		document.getElementById('fileInputButton').addEventListener('change', postFile, false);
 		checkAPIsupport();
 		getScriptListing();
 	}
-	function getScriptListing(){ // working
+	function getScriptListing(){
 		var xhr = new XMLHttpRequest;
 		xhr.open("GET", "/codeScrolls/", false);
 		xhr.send();
 		hierarchyTree = document.getElementById('r2c1');
 		if(xhr.status == 200){
-			hierarchyTree.innerHTML = xhr.response;
+			hierarchyTree.innerHTML = xhr.response; // trying to add buttons beside each listing to minipulate it
+			// aList = hierarchyTree.getElementsByTagName("a");
+			// console.log(aList)
+			// var newHierarchyTree = document.createElement("div");
+			// for (i = 0; i < aList.length; i++) {
+			// 	console.log(aList[i]);
+			// 	var listing = document.createElement("div");
+			// 	listing.appendChild(aList[i]);
+			// 	newHierarchyTree.appendChild(listing);
+			// }
+			// hierarchyTree = newHierarchyTree;
 		}else{
 			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
 		}
@@ -62,7 +74,7 @@
 		</div>
 		<div id="r2c2">
 			<div id="fileInputButtonDiv">
-				<p id="fileInputButtonP">Drop a script or click here to upload!</p>
+				<p id="fileInputButtonP">Drop a script or click here to upload! (Text Only)</p>
 				<input type="file" id="fileInputButton">
 			</div>
 		</div>

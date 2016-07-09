@@ -6,8 +6,14 @@
 
 # to do
 #       binary file transfer            x
-#       post binary file
+#       post binary file                cant be done via xhr
 #       delete files
+
+# notes
+#       uploads and downloads appear solid
+#           395707350c8a6363a23788a0fd5c49ed  _archive (1).sh
+#           395707350c8a6363a23788a0fd5c49ed  _archive.sh
+
 
 import http.server
 import socketserver
@@ -75,6 +81,7 @@ class handler(http.server.BaseHTTPRequestHandler):
         fp=self.rfile
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         length = int(self.headers.get_all('content-length')[0])
+        print(length)
         self.setHeaders(200)
         if(length > 0):
             f = open(filePath, 'wb')

@@ -27,3 +27,4 @@ find ~/Downloads/* -maxdepth 0 |sed 's#.*/##' |grep -v "^_" | while read x; do
 	echo mv "$dir/$x" "$dir/_Archive/$(date +%s)-$x"
 	mv "$dir/$x" "$dir/_Archive/$(date +%s)-$x"
 done
+
