@@ -2,12 +2,13 @@
 
 # Difficulties:
 #     posting data to server using a form
-#    allowing all file uploades including binary
 
 # to do
 #       binary file transfer            x
 #       post binary file                cant be done via xhr
 #       delete files
+#       allow user to upload file with really long name that's all one word
+#            Like : ThisIsAReallyLongName.WhoNamesSomethingLikeThis.why
 
 # notes
 #       uploads and downloads appear solid
@@ -68,7 +69,7 @@ class handler(http.server.BaseHTTPRequestHandler):
                 self.writeDataToHandler(index)
             else:
                 for i in os.listdir(filePath):
-                    i = "<a href=\'" + self.path + i + "\'>"+i+"</a></br>"
+                    i = "<a href=\'" + self.path + "/" + i + "\'>"+i+"</a></br>"
                     self.wfile.write(i.encode("UTF-8"))
         elif not os.path.exists(filePath):
             self.setHeaders(404)
@@ -80,6 +81,7 @@ class handler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         fp=self.rfile
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
+        filePath=re.sub("%20"," ",filePath)
         length = int(self.headers.get_all('content-length')[0])
         print(length)
         self.setHeaders(200)

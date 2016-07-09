@@ -53,6 +53,7 @@ div{
 }
 #r2c1{ /*hierarcy*/
   background-color: #97282C;
+  overflow: auto;
   position: fixed;
   top: 10vh;
   left: 0px;
@@ -66,4 +67,14 @@ div{
   left: 30vw;
   height: 100%;
   width:  70vw;
+}
+/* table */
+table {
+  border-spacing: 0;
+}
+table tr, td {
+  padding: 2px;
+}
+td {
+  border-bottom:1pt solid black;
 }

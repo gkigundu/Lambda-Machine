@@ -17,6 +17,7 @@
 	function postFile(evt){
 		var f = evt.target.files[0];
 		fileName = f.name;
+		console.log(fileName);
 		if (!f) {
 			alert("Failed to load file");
 		} else {
@@ -46,16 +47,37 @@
 		hierarchyTree = document.getElementById('r2c1');
 		if(xhr.status == 200){
 			hierarchyTree.innerHTML = xhr.response; // trying to add buttons beside each listing to minipulate it
-			// aList = hierarchyTree.getElementsByTagName("a");
-			// console.log(aList)
-			// var newHierarchyTree = document.createElement("div");
-			// for (i = 0; i < aList.length; i++) {
-			// 	console.log(aList[i]);
-			// 	var listing = document.createElement("div");
-			// 	listing.appendChild(aList[i]);
-			// 	newHierarchyTree.appendChild(listing);
-			// }
-			// hierarchyTree = newHierarchyTree;
+			var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
+			var newHierarchyTree = document.createElement("table");
+			for (i = 0; i < aList.length; i++) {
+				var tr  = document.createElement("tr")
+				var td1 = document.createElement("td");
+				var td2 = document.createElement("td");
+				var td3 = document.createElement("td");
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+				tr.appendChild(td3);
+				newHierarchyTree.appendChild(tr)
+
+				// create nodes
+				var text = document.createElement("p");
+				var view = document.createElement("img");
+				var run  = document.createElement("img");
+				// text node details
+				text.setAttribute("style", "text-align:right;");
+				view.setAttribute("src", "/res/view.png");
+				run .setAttribute("src", "/res/view.png");
+				view.setAttribute("style", "text-align : left;");
+				text.innerHTML = aList[i].innerHTML;
+				// append nodes.
+				td1.appendChild(view);
+				td2.appendChild(run );
+				td3.appendChild(text);
+			}
+			while (hierarchyTree.firstChild) {
+			    hierarchyTree.removeChild(hierarchyTree.firstChild);
+			}
+			hierarchyTree.appendChild(newHierarchyTree);
 		}else{
 			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
 		}
