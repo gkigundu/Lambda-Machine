@@ -22,6 +22,14 @@ div{
   width: 100%;
   height: 50px;
 }
+#contentView{
+  background-color: #805489;
+  overflow: auto;
+  margin-left:auto;
+  margin-right:auto;
+  width: 100%;
+  height: 100%;
+}
 #fileInputButtonP {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

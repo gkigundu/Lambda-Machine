@@ -68,9 +68,12 @@ class handler(http.server.BaseHTTPRequestHandler):
                 self.setHeaders(200)
                 self.writeDataToHandler(index)
             else:
-                for i in os.listdir(filePath):
-                    i = "<a href=\'" + self.path + "/" + i + "\'>"+i+"</a></br>"
-                    self.wfile.write(i.encode("UTF-8"))
+                if(len(os.listdir(filePath))):
+                    for i in os.listdir(filePath):
+                        i = "<a href=\'" + self.path + "/" + i + "\'>"+i+"</a></br>"
+                        self.wfile.write(i.encode("UTF-8"))
+                else:
+                    self.wfile.write("directory empty".encode("UTF-8"))
         elif not os.path.exists(filePath):
             self.setHeaders(404)
             string="File : '" + filePath + "' not found."

@@ -48,36 +48,47 @@
 		if(xhr.status == 200){
 			hierarchyTree.innerHTML = xhr.response; // trying to add buttons beside each listing to minipulate it
 			var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
-			var newHierarchyTree = document.createElement("table");
-			for (i = 0; i < aList.length; i++) {
-				var tr  = document.createElement("tr")
-				var td1 = document.createElement("td");
-				var td2 = document.createElement("td");
-				var td3 = document.createElement("td");
-				tr.appendChild(td1);
-				tr.appendChild(td2);
-				tr.appendChild(td3);
-				newHierarchyTree.appendChild(tr)
+			if(aList.length > 0){
+				var newHierarchyTree = document.createElement("table");
+				for (i = 0; i < aList.length; i++) {
+					var tr  = document.createElement("tr")
+					var td1 = document.createElement("td");
+					var td2 = document.createElement("td");
+					var td3 = document.createElement("td");
+					tr.appendChild(td1);
+					tr.appendChild(td2);
+					tr.appendChild(td3);
+					newHierarchyTree.appendChild(tr)
 
-				// create nodes
-				var text = document.createElement("p");
-				var view = document.createElement("img");
-				var run  = document.createElement("img");
-				// text node details
-				text.setAttribute("style", "text-align:right;");
-				view.setAttribute("src", "/res/view.png");
-				run .setAttribute("src", "/res/view.png");
-				view.setAttribute("style", "text-align : left;");
-				text.innerHTML = aList[i].innerHTML;
-				// append nodes.
-				td1.appendChild(view);
-				td2.appendChild(run );
-				td3.appendChild(text);
+					// create nodes
+					var text = document.createElement("p");
+					var view = document.createElement("img");
+					var run  = document.createElement("img");
+					// text node details
+					let imgSize = 20;
+					text.setAttribute("style", "text-align:right;");
+					view.setAttribute("style", "text-align : left;");
+					view.setAttribute("src", "/res/view.png");
+					run .setAttribute("src", "/res/run.png");
+					run .setAttribute("width", imgSize);
+					run .setAttribute("height", imgSize);
+					view.setAttribute("width", imgSize);
+					view.setAttribute("height", imgSize);
+					run .setAttribute("onclick", "run ('" + aList[i].innerHTML + "')");
+					view.setAttribute("onclick", "view('" + aList[i].innerHTML + "')");
+					text.innerHTML = aList[i].innerHTML;
+					// append nodes.
+					td1.appendChild(view);
+					td2.appendChild(run );
+					td3.appendChild(text);
+				}
+				while (hierarchyTree.firstChild) {
+					hierarchyTree.removeChild(hierarchyTree.firstChild);
+				}
+				hierarchyTree.appendChild(newHierarchyTree);
+			}else{
+				hierarchyTree.innerHTML = "<p style='text-align:center'>Uploaded Files Will Appear Here.</p>"
 			}
-			while (hierarchyTree.firstChild) {
-			    hierarchyTree.removeChild(hierarchyTree.firstChild);
-			}
-			hierarchyTree.appendChild(newHierarchyTree);
 		}else{
 			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
 		}
@@ -98,6 +109,9 @@
 			<div id="fileInputButtonDiv">
 				<p id="fileInputButtonP">Drop a script or click here to upload! (Text Only)</p>
 				<input type="file" id="fileInputButton">
+			</div>
+			<div id="contentView">
+				<p style='text-align:center'>Program Content will appear here.</p>
 			</div>
 		</div>
 	</div>
