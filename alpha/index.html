@@ -40,13 +40,27 @@
 		checkAPIsupport();
 		getScriptListing();
 	}
+	function view(fileName){
+		var hierarchyTree = document.getElementById('r2c1');
+		var rows = hierarchyTree.childNodes[0].getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			rows[i].style.backgroundColor = "";
+		}
+		var elem = document.getElementById(fileName);
+
+		var xhr = new XMLHttpRequest;
+		xhr.open("GET", "/codeScrolls/" + fileName, false);
+		xhr.send();
+		var contentView = document.getElementById('contentView')
+		contentView.innerHTML = "<pre>" + xhr.response + "</pre>"
+	}
 	function getScriptListing(){
 		var xhr = new XMLHttpRequest;
 		xhr.open("GET", "/codeScrolls/", false);
 		xhr.send();
-		hierarchyTree = document.getElementById('r2c1');
+		var hierarchyTree = document.getElementById('r2c1');
 		if(xhr.status == 200){
-			hierarchyTree.innerHTML = xhr.response; // trying to add buttons beside each listing to minipulate it
+			hierarchyTree.innerHTML = xhr.response;
 			var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
 			if(aList.length > 0){
 				var newHierarchyTree = document.createElement("table");
@@ -66,6 +80,7 @@
 					var run  = document.createElement("img");
 					// text node details
 					let imgSize = 20;
+					tr  .setAttribute("id", aList[i].innerHTML);
 					text.setAttribute("style", "text-align:right;");
 					view.setAttribute("style", "text-align : left;");
 					view.setAttribute("src", "/res/view.png");
@@ -101,6 +116,7 @@
 
 <body>
 	<div id="r1">
+		<p>banner</p>
 	</div>
 	<div id="r2">
 		<div id="r2c1">
@@ -110,8 +126,8 @@
 				<p id="fileInputButtonP">Drop a script or click here to upload! (Text Only)</p>
 				<input type="file" id="fileInputButton">
 			</div>
-			<div id="contentView">
-				<p style='text-align:center'>Program Content will appear here.</p>
+			<div id="contentView" >
+				<p style='text-align:center'>Program Content will appear here. (upload a file and click the eye)</p>
 			</div>
 		</div>
 	</div>
