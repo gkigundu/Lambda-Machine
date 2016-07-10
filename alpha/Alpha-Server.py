@@ -41,6 +41,7 @@ if not os.path.exists(codeDir):
     os.makedirs(codeDir)
 
 class handler(http.server.BaseHTTPRequestHandler):
+    # set http headers
     def setHeaders(self, code):
         self.send_response(code)
         self.send_header(b'Content-type', 'text/html')
@@ -93,7 +94,7 @@ class handler(http.server.BaseHTTPRequestHandler):
             f = open(filePath, 'wb')
             f.write(fp.read(length))
             f.close()
-        # self.redirect("/")
+    # redirects a client using javascript
     def redirect(self, dest):
         html1='''
             <!DOCTYPE HTML>
@@ -109,6 +110,7 @@ class handler(http.server.BaseHTTPRequestHandler):
         '''
         html = html1 + dest + html2
         self.wfile.write(html.encode("UTF-8"))
+    # deletes a script
     def do_DELETE(self):
         self._setHeaders()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
