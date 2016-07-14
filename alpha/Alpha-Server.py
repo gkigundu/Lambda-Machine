@@ -22,6 +22,8 @@ import socketserver
 import signal
 import sys, os, re
 import cgi
+sys.path.append("..")
+import lambdaUtils
 
 # Global Defaults
 port = 8000
@@ -117,7 +119,7 @@ class handler(http.server.BaseHTTPRequestHandler):
 # run server
 socketserver.TCPServer.allow_reuse_address = True
 httpd = socketserver.TCPServer((addr, port), handler)
-print("<log> Serving @ " + str(addr) + ":" + str(port))
+lambdaUtils.log(" Serving @ " + str(addr) + ":" + str(port))
 try:
     httpd.serve_forever()
 except KeyboardInterrupt:

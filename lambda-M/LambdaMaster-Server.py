@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import sys
+sys.path.append("..")
+import lambdaUtils
+
 port = 80000
 addr = "127.0.0.1"
 

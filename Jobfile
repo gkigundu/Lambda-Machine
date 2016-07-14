@@ -1,0 +1,5 @@
+#!/bin/bash
+
+alpha:
+  cd alpha
+  ./Alpha-Server.py
