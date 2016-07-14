@@ -2,13 +2,14 @@
 
 import urllib.request
 import sys, os, zipfile
+import subprocess
 sys.path.append("..")
 import lambdaUtils as lu
 
 port=8000
 addr="127.0.0.1"
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
-databaseDir="elastic"
+databaseDir="elasticsearch-2.3.4"
 outputZip="master.zip"
 
 try:
@@ -29,5 +30,10 @@ try:
         lu.log("Removing zip file.")
         os.remove(outputZip)
         lu.log("Set up elastic sucessfully.")
+    lu.log("Starting elastic.")
+    lu.log("=================")
+    command = "bash " + databaseDir + "/bin/elasticsearch"
+    command = command.split(" ")
+    subprocess.run(command , stdout=sys.stdout, stderr=sys.stderr)
 except IOError as e:
     lu.error("Write error", e)
