@@ -18,6 +18,7 @@ outputZip=filePath+"/master.zip"
 
 def main():
     try:
+        # setup elastic search
         if not os.path.exists(databaseDir):
             os.makedirs(databaseDir)
             req = urllib.request.urlopen(urlToGet)
@@ -38,10 +39,11 @@ def main():
         lu.log("Starting elastic.")
         lu.log("=================")
 
+        # run elastic search in python wrapper
         command = "bash " + databaseDir + "/bin/elasticsearch"
         command = command.split(" ")
         proc = subprocess.Popen(command , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # run server here to respond to http get requests concerning proc
+        # outputs server logs
         while (1):
             for line in iter(proc.stdout.readline,''):
                 if(len(line) > 0):
@@ -52,4 +54,3 @@ def main():
         lu.log("Keyboard Interupt. Shutting Down.")
         proc.kill()
 main()
-

@@ -15,10 +15,15 @@ def error(string, e):
     sys.stderr.write(str(e))
     sys.stderr.flush()
     sys.exit(1)
+def getAddr():
+    # returns LAN address
+  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  s.connect(("8.8.8.8", 80))
+  return s.getsockname()[0]
 
-# https://wiki.python.org/moin/UdpCommunication
-# Interprocess communication
 class nodeDiscovery():
+    # Interprocess communication
+    # served over UDP
   broadcastPort=35353
   broadcastAddr=ipaddress.ip_network('192.168.1.0/24')
   sleepTime=5
@@ -28,21 +33,19 @@ class nodeDiscovery():
     #   It also listens for incoming messages
     self.readBuffer=queue.Queue(maxsize=5)
     self.name=name
-    self.addr=self.getAddr()
+    self.addr=getAddr()
     broadcastMsg=str(self.addr)+" "+self.name
     broadcastThread = threading.Thread(target=self._broadcast, args = (broadcastMsg,))
     broadcastThread.start()
 
   def listen(self):
       # only one listener per computer. This will be used by the omega server to create a network table.
+      #      otherwise : " OSError: [Errno 98] Address already in use "
       listenThread = threading.Thread(target=self._listen, args = ())
       listenThread.start()
-  def getAddr(self):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    return s.getsockname()[0]
 
   def _broadcast(self, msg):
+      # continually sends out ping messages with the clients ip addr and name
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     while self.alive:
@@ -51,6 +54,7 @@ class nodeDiscovery():
     sleep(self.sleepTime)
 
   def _listen(self):
+      # listens to the broadcast messages and adds them to queue
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((self.addr, self.broadcastPort))
     while self.alive:
@@ -61,24 +65,35 @@ class nodeDiscovery():
         self.readBuffer.get()
         print("Queue overflow. Dropping datagram.")
   def getMsg (self):
+      # returns the most recent broadcast message in the queue
     if not self.readBuffer.empty():
       return self.readBuffer.get()
     else:
       return None
   def sendMsg(self):
+      # temporary may not be implemented.
     if self.alive:
       for addr in self.broadcastAddr:
         self.sock.sendto(msg.encode("UTF-8"), (str(addr), self.broadcastPort))
       return 0
     return -1
   def kill(self):
+      # destroys the nodeDiscovery threads
     self.alive=False
 
 def test():
-  nodes=[]
-  nodes.append(nodeDiscovery("cat"))
-  nodes.append(nodeDiscovery("dog"))
-  nodes.append(nodeDiscovery("hog"))
+    nodes=[]
+    for i in range(0,30):
+        nodes.append(nodeDiscovery("cat" + str(i)))
+
+    sleep (3)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto("tableReq".encode("UTF-8"), ("192.168.1.159", 48484))
+    while 1:
+      data, addr = sock.recvfrom(1024) # 1024
+      print(data.decode("UTF-8"))
+
   # person = nodeDiscovery("person")
   # person.listen()
   # nodes.append(person)
@@ -88,4 +103,5 @@ def test():
   #       if msg != None:
   #           print(msg)
             # sleep(1)
-# test()
+if __name__ == '__main__':
+    test()

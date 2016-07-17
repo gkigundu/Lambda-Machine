@@ -2,14 +2,12 @@
 
 import sys, os
 import calendar, time
+import threading, socket
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
-
-port = 8000
-addr = "127.0.0.1"
 
 args=sys.argv[1:]
 for i in range(len(args)):
@@ -18,6 +16,7 @@ for i in range(len(args)):
     if (args[i] == "-a"):
         addr = str(args[i+1])
 
+table = None
 class networkTable():
     # stores all of the active hosts on the network.
     networkTable=None
@@ -34,10 +33,11 @@ class networkTable():
                 break
         if(updated == 0):
             self.networkTable.append([ip, name, time])
-    def getTable():
+    def getTable(self):
         return self.networkTable
 
 def main():
+    global table
     table = networkTable()
     broadcastListener = lu.nodeDiscovery("omega")
     broadcastListener.listen()
@@ -46,10 +46,7 @@ def main():
         if msg != None:
             info=msg.split(" ")
             table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
-# class network:
-#     # gets execution status of all Lambda-m
-#     def getStatusFromLambda-m:
-#
-#     # listen for alpha request. Returns status of Lamda-M and Lambda-m
-#     def listenForAlpha:
+
+# implement a network handler for handling network table requests.
+
 main()
