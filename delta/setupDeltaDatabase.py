@@ -45,7 +45,7 @@ def main():
         while (1):
             for line in iter(proc.stdout.readline,''):
                 if(len(line) > 0):
-                  print(line.decode("utf-8").rstrip() )
+                    print(line.decode("utf-8").rstrip() )
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:

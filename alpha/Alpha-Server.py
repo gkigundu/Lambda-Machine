@@ -94,7 +94,6 @@ class handler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         filePath=re.sub("%20"," ",filePath)
         length = int(self.headers.get_all('content-length')[0])
-        print(length)
         self.setHeaders(200)
         if(length > 0):
             f = open(filePath, 'wb')
