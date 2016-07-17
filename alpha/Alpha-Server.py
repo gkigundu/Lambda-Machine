@@ -22,8 +22,12 @@ import socketserver
 import signal
 import sys, os, re
 import cgi
-print(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
-import lambdaUtils
+
+filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
+rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(rootPath)
+import lambdaUtils as lu
+os.chdir(filePath)
 
 # Global Defaults
 port = 8000
@@ -119,7 +123,7 @@ class handler(http.server.BaseHTTPRequestHandler):
 # run server
 socketserver.TCPServer.allow_reuse_address = True
 httpd = socketserver.TCPServer((addr, port), handler)
-lambdaUtils.log(" Serving @ " + str(addr) + ":" + str(port))
+lu.log(" Serving @ " + str(addr) + ":" + str(port))
 try:
     httpd.serve_forever()
 except KeyboardInterrupt:

@@ -8,6 +8,7 @@ filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
+os.chdir(filePath)
 
 port=8000
 addr="127.0.0.1"
