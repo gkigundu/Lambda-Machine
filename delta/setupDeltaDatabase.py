@@ -3,14 +3,17 @@
 import urllib.request
 import sys, os, zipfile
 import subprocess
-sys.path.append("..")
+
+filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
+rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(rootPath)
 import lambdaUtils as lu
 
 port=8000
 addr="127.0.0.1"
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
-databaseDir="elasticsearch-2.3.4"
-outputZip="master.zip"
+databaseDir=filePath+"/elasticsearch-2.3.4"
+outputZip=filePath+"/master.zip"
 
 def main():
     try:
@@ -27,7 +30,7 @@ def main():
                         break
             lu.log("Unzipping elastic.")
             with zipfile.ZipFile(outputZip,"r") as zip_ref:
-                zip_ref.extractall(".")
+                zip_ref.extractall(filePath)
             lu.log("Removing zip file.")
             os.remove(outputZip)
             lu.log("Set up elastic sucessfully.")
@@ -40,7 +43,12 @@ def main():
         # run server here to respond to http get requests concerning proc
         while (1):
             for line in iter(proc.stdout.readline,''):
-                print(line.decode("utf-8").rstrip() )
+                if(len(line) > 0):
+                  print(line.decode("utf-8").rstrip() )
     except IOError as e:
         lu.error("Write error", e)
+    except KeyboardInterrupt as e:
+        lu.log("Keyboard Interupt. Shutting Down.")
+        proc.kill()
 main()
+

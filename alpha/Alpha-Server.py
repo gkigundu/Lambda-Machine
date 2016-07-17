@@ -22,7 +22,7 @@ import socketserver
 import signal
 import sys, os, re
 import cgi
-sys.path.append("..")
+print(os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 import lambdaUtils
 
 # Global Defaults

@@ -1,5 +1,6 @@
 #!/bin/bash
 
-alpha:
-  cd alpha
-  ./Alpha-Server.py
+startAll:
+	logFile="global.log"
+	alpha/Alpha-Server.py       >> "$logFile" &
+	delta/setupDeltaDatabase.py >> "$logFile" &
