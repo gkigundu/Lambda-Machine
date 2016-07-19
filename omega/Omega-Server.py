@@ -21,9 +21,13 @@ os.chdir(filePath)
 table = None
 class networkTable():
     # stores all of the active hosts on the network.
+    minionNumber=0
     networkTable=None
     def __init__(self):
         self.networkTable=[]
+    def getMinionNumber(self):
+        self.minionNumber=self.minionNumber+1
+        return self.minionNumber
     def updateEntry(self, ip, name, time):
         updated = 0
         for i in range(0, len(self.networkTable)):
@@ -51,7 +55,7 @@ def main():
             info=msg.split(" ")
             table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
 
-# implement a network handler for handling network table requests.
+# implements a network handler for handling network table requests. returns a python list with http headers. TCP based
 class tableReqest():
   addr=lu.getAddr()
   port=lu.ports["omega"]
@@ -69,6 +73,13 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_header(b'Content-type', 'text/html')
         self.end_headers()
     def do_GET(self): # check if contained to directory
-        self.setHeaders(200)
-        self.wfile.write(str(table.getTable()).encode("UTF-8"))
+        if(self.path == "/table"):
+            self.setHeaders(200)
+            self.wfile.write(str(table.getTable()).encode("UTF-8"))
+        elif(self.path == "/lambdaMinionNumber"):
+            self.setHeaders(200)
+            self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
+        else:
+            self.setHeaders(500)
+
 main()

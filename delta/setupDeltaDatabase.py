@@ -43,6 +43,7 @@ def main():
         command = "bash " + databaseDir + "/bin/elasticsearch"
         command = command.split(" ")
         proc = subprocess.Popen(command , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        broadcastListener = lu.nodeDiscovery("delta")
         # outputs server logs
         while (1):
             for line in iter(proc.stdout.readline,''):

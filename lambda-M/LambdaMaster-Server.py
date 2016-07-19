@@ -17,6 +17,8 @@ for i in range(len(args)):
     if (args[i] == "-a"):
         addr = str(args[i+1])
 
+def main():
+    broadcastListener = lu.nodeDiscovery("Lambda-M")
 class minions:
     minionTable = []
 
@@ -29,3 +31,5 @@ class network:
 
     # returns relevent information concerning Lambda-M
     def listenForOmega:
+
+main()

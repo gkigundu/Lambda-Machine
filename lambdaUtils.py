@@ -6,11 +6,14 @@ import queue
 from time import sleep
 
 ports = {}
-ports["alpha"]    = 26000
-ports["omega"]    = 26001
-ports["delta"]    = 26002
-ports["lambda-M"] = 26003
-ports["lambda-m"] = 26004
+ports["alpha"]             = 26000
+ports["omega"]             = 26001
+ports["delta"]             = 26002
+ports["lambda-M"]          = 26003
+ports["lambda-m"]          = 26004
+
+ports["BroadcastListenerAddr"]    = 26101
+ports["Broadcast"]                = 26102
 
 def log(string):
     sys.stdout.write("<log>   " + str(string) + "\n")
@@ -30,46 +33,48 @@ def getAddr():
 class nodeDiscovery():
     # Interprocess communication
     # served over UDP
-  broadcastPort=35353
   broadcastAddr=ipaddress.ip_network('192.168.1.0/24')
   sleepTime=5
   alive=True
+  queueSize=20
   def __init__(self,name):
     # initializes a multicast UDP socket and broadkasts the nodes ip address to the subnet.
     #   It also listens for incoming messages
-    self.readBuffer=queue.Queue(maxsize=5)
+    self.readBuffer=queue.Queue(maxsize=self.queueSize)
     self.name=name
     self.addr=getAddr()
-    broadcastMsg=str(self.addr)+" "+self.name
-    broadcastThread = threading.Thread(target=self._broadcast, args = (broadcastMsg,))
+    self.broadcastMsg=str(self.addr)+" "+str(self.name)
+    broadcastThread = threading.Thread(target=self._broadcast, args = (self.broadcastMsg,ports["Broadcast"]))
     broadcastThread.start()
 
   def listen(self):
-      # only one listener per computer. This will be used by the omega server to create a network table.
+      # only one listener per computer. This will be used by the omega server to create a network table. UDP
       #      otherwise : " OSError: [Errno 98] Address already in use "
       listenThread = threading.Thread(target=self._listen, args = ())
       listenThread.start()
 
-  def _broadcast(self, msg):
-      # continually sends out ping messages with the clients ip addr and name
+  def _broadcast(self, msg, port):
+      # continually sends out ping messages with the clients ip addr and name. UDP
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     while self.alive:
         for addr in self.broadcastAddr:
-            sock.sendto(msg.encode("UTF-8"), (str(addr), self.broadcastPort))
+            sock.sendto(msg.encode("UTF-8"), (str(addr), port))
     sleep(self.sleepTime)
 
   def _listen(self):
-      # listens to the broadcast messages and adds them to queue
+  # listens to the broadcast messages and adds them to queue. UDP
+    broadcastThread = threading.Thread(target=self._broadcast, args = (self.broadcastMsg,ports["BroadcastListenerAddr"]))
+    broadcastThread.start()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((self.addr, self.broadcastPort))
+    sock.bind((self.addr, ports["Broadcast"])) # UDP
     while self.alive:
       data, addr = sock.recvfrom(1024)
       if not self.readBuffer.full():
         self.readBuffer.put(data.decode("UTF-8"))
       else:
         self.readBuffer.get()
-        print("Queue overflow. Dropping datagram.")
+        lu.log("Queue overflow. Dropping datagram.")
   def getMsg (self):
       # returns the most recent broadcast message in the queue
     if not self.readBuffer.empty():

@@ -124,6 +124,7 @@ socketserver.TCPServer.allow_reuse_address = True
 httpd = socketserver.TCPServer((addr, port), handler)
 lu.log(" Serving @ " + str(addr) + ":" + str(port))
 try:
+    broadcastListener = lu.nodeDiscovery("alpha")
     httpd.serve_forever()
 except KeyboardInterrupt:
     sys.exit(0)
