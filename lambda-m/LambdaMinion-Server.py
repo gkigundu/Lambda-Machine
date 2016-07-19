@@ -7,8 +7,8 @@ sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-port = 8000
-addr = "127.0.0.1"
+port=lu.ports["lambda-m"]
+addr=lu.getAddr()
 
 args=sys.argv[1:]
 for i in range(len(args)):

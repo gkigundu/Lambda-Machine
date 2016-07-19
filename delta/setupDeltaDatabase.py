@@ -10,8 +10,8 @@ sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-port=8000
-addr="127.0.0.1"
+port=lu.ports["delta"]
+addr=lu.getAddr()
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
 databaseDir=filePath+"/elasticsearch-2.3.4"
 outputZip=filePath+"/master.zip"
@@ -47,7 +47,7 @@ def main():
         while (1):
             for line in iter(proc.stdout.readline,''):
                 if(len(line) > 0):
-                    print(line.decode("utf-8").rstrip() )
+                    lu.log(line.decode("utf-8").rstrip() )
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:

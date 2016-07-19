@@ -30,8 +30,8 @@ import lambdaUtils as lu
 os.chdir(filePath)
 
 # Global Defaults
-port = 8000
-addr = "127.0.0.1"
+port=lu.ports["alpha"]
+addr=lu.getAddr()
 codeDir = "codeScrolls"
 
 # get args

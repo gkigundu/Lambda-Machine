@@ -91,11 +91,9 @@ def test():
     nodes=[]
     for i in range(0,30):
         nodes.append(nodeDiscovery("cat" + str(i)))
-
     sleep (3)
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("tableReq".encode("UTF-8"), ("192.168.1.159", 48484))
+    sock.sendto("tableReq".encode("UTF-8"), ("192.168.1.159", ports["omega"]))
     while 1:
       data, addr = sock.recvfrom(1024) # 1024
       print(data.decode("UTF-8"))
