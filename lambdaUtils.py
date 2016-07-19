@@ -6,14 +6,14 @@ import queue
 from time import sleep
 
 ports = {}
-ports["alpha"]             = 26000
-ports["omega"]             = 26001
-ports["delta"]             = 26002
-ports["lambda-M"]          = 26003
-ports["lambda-m"]          = 26004
+ports["alpha"]             = 26000 # HTTP
+ports["omega"]             = 26001 # HTTP
+ports["delta"]             = 26002 #
+ports["lambda-M"]          = 26003 #
+ports["lambda-m"]          = 26004 #
 
-ports["BroadcastListenerAddr"]    = 26101
-ports["Broadcast"]                = 26102
+ports["BroadcastListenerAddr"]    = 26101 # UDP
+ports["Broadcast"]                = 26102 # UDP
 
 def log(string):
     sys.stdout.write("<log>   " + str(string) + "\n")

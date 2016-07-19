@@ -29,11 +29,12 @@ class minion():
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.omegaSerLoc = self._getOmegaSerLoc()
-        self.name = self._getName()
+        self.ID = self._getMinionID(self.omegaSerLoc)
     # find out where the Omega Server is
-    def _getName(self):
+    def _getMinionID(self):
         # print('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber')
-        with urllib.request.urlopen('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber') as response:
+        with urllib.request.urlopen('http://'+str(self.omegaSerLoc)
+                +':'+str(lu.ports["BroadcastListenerAddr"])+'/lambdaMinionNumber') as response:
             html = response.read()
             print(html)
         return ""
@@ -45,14 +46,14 @@ class minion():
                 sock.settimeout(self.UDPtimout)
                 sock.bind((self.addr, lu.ports["BroadcastListenerAddr"])) # UDP
                 data, addr = sock.recvfrom(1024)
-                print(data)
                 if(len(data) > 0):
                     omegaBroadcastReceived = True
             except socket.timeout as e:
                 lu.log("Could not get Omega Server Address. Retrying")
         # print(data)
-        lu.log("Got Address : " + data)
-        return data
+        addr=data.decode("UTF-8").split(" ")
+        lu.log("Got Address : " + addr[0])
+        return addr[0]
 
 
 
