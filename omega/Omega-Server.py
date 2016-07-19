@@ -3,6 +3,8 @@
 import sys, os
 import calendar, time
 import threading, socket
+import socketserver
+
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
@@ -48,5 +50,20 @@ def main():
             table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
 
 # implement a network handler for handling network table requests.
+class tableReqest():
+  addr=lu.getAddr()
+  port=
+  def __init__():
+    socketserver.TCPServer.allow_reuse_address = True
+    tableRequestServer = socketserver.TCPServer((addr, port), tableRequestHandler)
+    lu.log(" Serving @ " + str(addr) + ":" + str(port))
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        sys.exit(0)
+class tableRequestHandler():
+  def __init__():
+    print("cat")
+
 
 main()

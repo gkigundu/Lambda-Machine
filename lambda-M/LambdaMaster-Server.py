@@ -7,9 +7,6 @@ sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-port = 80000
-addr = "127.0.0.1"
-
 args=sys.argv[1:]
 for i in range(len(args)):
     if (args[i] == "-p"):

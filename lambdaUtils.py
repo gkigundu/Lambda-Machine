@@ -5,6 +5,12 @@ import threading
 import queue
 from time import sleep
 
+ports = {}
+ports["alpha"]    = 26000
+ports["omega"]    = 26001
+ports["delta"]    = 26002
+ports["lambda-M"] = 26003
+ports["lambda-m"] = 26004
 
 def log(string):
     sys.stdout.write("<log>   " + str(string) + "\n")
