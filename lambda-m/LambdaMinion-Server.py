@@ -17,11 +17,10 @@ for i in range(len(args)):
         addr = str(args[i+1])
 
 def main():
+    # make a friendly minion to work for you
     myMinion = minion()
-    print(myMinion.name)
-    print(myMinion.omegaSerLoc)
-    # start broadcasting my address
-    broadcastListener = lu.nodeDiscovery("Lambda-m." + getMinionNumber())
+    # start broadcasting his address
+    broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID)
 
 class minion():
     UDPtimout=1
@@ -29,15 +28,16 @@ class minion():
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.omegaSerLoc = self._getOmegaSerLoc()
-        self.ID = self._getMinionID(self.omegaSerLoc)
+        self.ID = self._getMinionID()
     # find out where the Omega Server is
     def _getMinionID(self):
         # print('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber')
-        with urllib.request.urlopen('http://'+str(self.omegaSerLoc)
-                +':'+str(lu.ports["BroadcastListenerAddr"])+'/lambdaMinionNumber') as response:
-            html = response.read()
-            print(html)
-        return ""
+        requestURL='http://'+str(self.omegaSerLoc)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'
+        lu.log("Requesting " + requestURL)
+        with urllib.request.urlopen(requestURL) as response:
+            minionID = response.read().decode("UTF-8")
+            lu.log("Got Minion ID : "+ minionID)
+        return minionID
     def _getOmegaSerLoc(self):
         omegaBroadcastReceived = False
         while not omegaBroadcastReceived:

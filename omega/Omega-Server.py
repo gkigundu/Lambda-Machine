@@ -64,16 +64,22 @@ class tableReqest():
     tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)
     broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,))
     broadcastThread.start()
-    lu.log(" Serving @ " + str(self.addr) + ":" + str(self.port))
+    lu.log(" Serving Table Requests @ " + str(self.addr) + ":" + str(self.port))
   def _threadServe(self, httpd):
     httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
+    properPath="/table /lambdaMinionNumber"
     def setHeaders(self, code):
         self.send_response(code)
         self.send_header(b'Content-type', 'text/html')
         self.end_headers()
     def do_GET(self): # check if contained to directory
-        if(self.path == "/table"):
+        lu.log("Handling the Request to : " + self.path)
+
+        if(self.path == "/"):
+            self.setHeaders(200)
+            self.wfile.write(str("Please Request a proper path. Try : "+self.properPath).encode("UTF-8"))
+        elif(self.path == "/table"):
             self.setHeaders(200)
             self.wfile.write(str(table.getTable()).encode("UTF-8"))
         elif(self.path == "/lambdaMinionNumber"):

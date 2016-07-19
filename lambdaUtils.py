@@ -9,9 +9,10 @@ ports = {}
 ports["alpha"]             = 26000 # HTTP
 ports["omega"]             = 26001 # HTTP
 ports["delta"]             = 26002 #
-ports["lambda-M"]          = 26003 #
+# ports["lambda-M"]          = 26003 #
 ports["lambda-m"]          = 26004 #
 
+# used for host discovery
 ports["BroadcastListenerAddr"]    = 26101 # UDP
 ports["Broadcast"]                = 26102 # UDP
 
