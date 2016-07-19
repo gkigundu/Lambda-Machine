@@ -44,12 +44,14 @@ class minion():
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 sock.settimeout(self.UDPtimout)
+                lu.log("Binding to " + str((self.addr, lu.ports["BroadcastListenerAddr"])))
                 sock.bind((self.addr, lu.ports["BroadcastListenerAddr"])) # UDP
                 data, addr = sock.recvfrom(1024)
                 if(len(data) > 0):
                     omegaBroadcastReceived = True
             except socket.timeout as e:
                 lu.log("Could not get Omega Server Address. Retrying")
+        sock.close()
         # print(data)
         addr=data.decode("UTF-8").split(" ")
         lu.log("Got Address : " + addr[0])

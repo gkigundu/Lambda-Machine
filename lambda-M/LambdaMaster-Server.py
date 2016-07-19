@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 
-############
-#  THIS MAY BE VOID
-############
-
-
-
-
-
-
+# pushes data from alpha to minions
 
 import sys
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -29,15 +21,10 @@ for i in range(len(args)):
 
 def main():
     broadcastListener = lu.nodeDiscovery("Lambda-M")
-class minions:
-    minionTable = []
 
 class network:
     # Receive a program to be redirected to Lambda-m
     def listenForAlpha:
-
-    # receive connections from Lambda-m
-    def listenForLambda-m:
 
     # returns relevent information concerning Lambda-M
     def listenForOmega:

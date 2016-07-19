@@ -17,7 +17,7 @@ ports["BroadcastListenerAddr"]    = 26101 # UDP
 ports["Broadcast"]                = 26102 # UDP
 
 def log(string):
-    sys.stdout.write("<log>   " + str(string) + "\n")
+    sys.stdout.write("<log>   " + str(string).strip() + "\n")
     sys.stdout.flush()
 def error(string, e):
     sys.stderr.write("<ERROR> " + str(string) + "\n")
@@ -64,9 +64,11 @@ class nodeDiscovery():
     sleep(self.sleepTime)
 
   def _listen(self):
-  # listens to the broadcast messages and adds them to queue. UDP
+    # broadcast the omega server's address for Lambda Minions
+    log("Broadcasting Omega Server's IP on port : " + str(ports["BroadcastListenerAddr"]))
     broadcastThread = threading.Thread(target=self._broadcast, args = (self.broadcastMsg,ports["BroadcastListenerAddr"]))
     broadcastThread.start()
+    # listens to the broadcast messages and adds them to queue. UDP
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((self.addr, ports["Broadcast"])) # UDP
     while self.alive:

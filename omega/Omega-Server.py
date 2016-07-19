@@ -49,6 +49,8 @@ def main():
     broadcastListener = lu.nodeDiscovery("omega")
     broadcastListener.listen()
     tableRequestObj = tableReqest()
+    # get UDP pings from network to create Network table entries
+    lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["Broadcast"]))
     while 1 :
         msg = broadcastListener.getMsg()
         if msg != None:
@@ -64,7 +66,7 @@ class tableReqest():
     tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)
     broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,))
     broadcastThread.start()
-    lu.log(" Serving Table Requests @ " + str(self.addr) + ":" + str(self.port))
+    lu.log(" Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
   def _threadServe(self, httpd):
     httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
