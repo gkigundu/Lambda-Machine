@@ -59,7 +59,7 @@ class minion():
 
 
 
-# this class runs the scipt it receives and outputs data to database
+# this class runs the script it receives and outputs data to database
 # class executer:
 #     # run the program
 #     def run:
@@ -74,7 +74,7 @@ class minion():
 #     # requests a connection to Lambda-M, executes "listenForLambda-m" on Lambda-M
 #     def requestLambda-M:
 #
-#     # returns relevent information concerning Lambda-M
+#     # returns relevant information concerning Lambda-M
 #     def listenForOmega:
 
 main()

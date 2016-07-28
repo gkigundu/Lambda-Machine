@@ -39,7 +39,7 @@ class nodeDiscovery():
   alive=True
   queueSize=20
   def __init__(self,name):
-    # initializes a multicast UDP socket and broadkasts the nodes ip address to the subnet.
+    # initializes a multicast UDP socket and broadcasts the nodes ip address to the subnet.
     #   It also listens for incoming messages
     self.readBuffer=queue.Queue(maxsize=self.queueSize)
     self.name=name

@@ -48,7 +48,7 @@ def main():
     # get messages over UDP to update networkTable
     broadcastListener = lu.nodeDiscovery("omega")
     broadcastListener.listen()
-    tableRequestObj = tableReqest()
+    tableRequestObj = tableRequest()
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["Broadcast"]))
     while 1 :
@@ -58,7 +58,7 @@ def main():
             table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
 
 # implements a network handler for handling network table requests. returns a python list with http headers. TCP based
-class tableReqest():
+class tableRequest():
   addr=lu.getAddr()
   port=lu.ports["omega"]
   def __init__(self):

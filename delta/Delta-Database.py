@@ -35,7 +35,7 @@ def main():
                 zip_ref.extractall(filePath)
             lu.log("Removing zip file.")
             os.remove(outputZip)
-            lu.log("Set up elastic sucessfully.")
+            lu.log("Set up elastic successfully.")
         lu.log("Starting elastic.")
         lu.log("=================")
 
@@ -52,6 +52,6 @@ def main():
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:
-        lu.log("Keyboard Interupt. Shutting Down.")
+        lu.log("Keyboard interrupt. Shutting Down.")
         proc.kill()
 main()

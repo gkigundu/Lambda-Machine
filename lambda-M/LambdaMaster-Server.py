@@ -26,7 +26,7 @@ class network:
     # Receive a program to be redirected to Lambda-m
     def listenForAlpha:
 
-    # returns relevent information concerning Lambda-M
+    # returns relevant information concerning Lambda-M
     def listenForOmega:
 
 main()
