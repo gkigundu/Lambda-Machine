@@ -1,15 +1,10 @@
-#!/bin/bash
-
-startAll:
-	echo "" > "$logFile"
-	pid=$(ps -ef | grep "alpha/Alpha-Server.py\|delta/setupDeltaDatabase.py" | grep -v "grep" | awk '{print $2}')
-	while [ $(echo $pid | wc -c) -gt 1 ] ; do
-		echo $pid | while read p ; do
-			kill $p
-		done
-		sleep 1
-	done
-	logFile="global.log"
-	alpha/Alpha-Server.py       2>&1 >> "$logFile" &
-	delta/setupDeltaDatabase.py 2>&1 >> "$logFile" &
+pull:
+	git pull
+push:
+	git add .
+	git commit
+	git push --repo=git@github.com:XDerekMaierX/$(pwd | sed 's/.*\///g').git -q
+	git pull
+viewChanges:
+	git log -p
 
