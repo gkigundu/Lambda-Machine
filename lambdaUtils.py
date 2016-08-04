@@ -19,10 +19,11 @@ ports["Broadcast"]                = 26102 # UDP
 def log(string):
     sys.stdout.write("<log>   " + str(string).strip() + "\n")
     sys.stdout.flush()
-def error(string, e):
+def error(string, *e):
     sys.stderr.write("<ERROR> " + str(string) + "\n")
-    sys.stderr.write("============================\n")
-    sys.stderr.write(str(e))
+    if len(e) > 0:
+      sys.stderr.write("============================\n")
+      sys.stderr.write(str(e))
     sys.stderr.flush()
     sys.exit(1)
 def getAddr():
