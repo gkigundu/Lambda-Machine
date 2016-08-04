@@ -3,11 +3,10 @@
 # this script is not necessary to run the Lambda Machine. You may set the componenets up manually.
 # this relys on a terminal emulator like xterm
 
-import subprocess
+import subprocess, threading
 import sys, os
-import re
+import re, io
 import lambdaUtils as lu
-import threading
 
 # help
 help= [
@@ -72,25 +71,33 @@ def main():
     lu.error("You've Chosen not to continue.")
   someAlive=1
   while someAlive > 0:
+    someAlive=0
     for comp in liveComp:
-      someAlive=someAlive+comp.isAlive()
+      out = comp.getOutput()
+      if not out == None:
+        sys.stdout.write(out[0])
+        sys.stderr.write(out[1])
+        sys.stdout.flush()
+        sys.stderr.flush()
     for comp in liveComp:
-      if comp.isAlive():
-        out = comp.getOutput()
-        if len(out) > 0 :
-          print(out)
+      if comp.isAlive() != None:
+        someAlive=someAlive+comp.isAlive()
+      else:
+        someAlive=1
 class component():
-  proc=None
+  subProc=None
   def getOutput(self):
-    if(self.proc.isAlive()):
-      return self.proc.getOutput()
-    else:
-      return ""
+    if(self.subProc):
+      return "cat" ######### <<<<<
+    return None
   def isAlive(self):
-    if(self.proc.isAlive()):
-      return 1
+    if (self.subProc != None):
+      if (self.subProc.poll() == None):
+        return 1
+      else:
+        return 0
     else:
-      return 0
+      return None
   def __init__(self, comp):
     if(dockerMode):
       lu.log("Docker Mode is not currently implemented.")
@@ -117,31 +124,11 @@ class component():
       elif comp == "omega":
         print(comp)
       elif comp == "delta":
-        self.proc=subProcess("ls " + compPath)
+        self.proc=self.subProcess("./test ") # + compPath
       else:
         lu.error(comp + " not a recognized component")
-class subProcess(): # run in daemon mode
-  subProc=None
-  thread=None
-  def __init__(self, command):
-    command=command.strip()
-    lu.log("Executing [" + command + "]")
-    self.thread=threading.Thread(target=self._subProcess, args=(command,))
-    self.thread.start()
-  def isAlive(self):
-    # print(self.subProc)
-    if(self.thread.is_alive()):
-      return 1
-    else:
-      return 0
-  def getOutput(self):
-    if(self.isAlive()):
-      stdout=self.subProc.stdout.decode("UTF-8").strip()
-      stderr=self.subProc.stderr.decode("UTF-8").strip()
-      returncode=self.subProc.returncode
-      return (returncode,stdout,stderr)
-  def _subProcess(self,command):
-    self.subProc=subprocess.run(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    
-  
+  def subProcess(self, command):
+    threading.Thread(target=self._subProcess, args=(command,), daemon=True).start()
+  def _subProcess(self, command):
+    self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 main()
