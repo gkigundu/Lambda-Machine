@@ -80,7 +80,7 @@ class subProc():
     self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 ## END subproc
 def log(string):
-    sys.stdout.write("<log> " + getCallerFile() + " : " + str(string).strip() + "\n")
+    sys.stdout.write("<log> " + getCallerFile( ) + " : " + str(string).strip() + "\n")
     sys.stdout.flush()
 def error(string, *e):
     sys.stderr.write("<ERROR> " + getCallerFile() + " : " + str(string) + "\n")
