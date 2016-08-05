@@ -64,6 +64,7 @@ class handler(http.server.BaseHTTPRequestHandler):
             f.close()
     # GET
     def do_GET(self): # check if contained to directory
+        lu.log("Get Request - " + self.path)
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
@@ -85,11 +86,13 @@ class handler(http.server.BaseHTTPRequestHandler):
         elif not os.path.exists(filePath):
             self.setHeaders(404)
             string="File : '" + filePath + "' not found."
+            lu.log(string)
             self.wfile.write(string.encode("UTF-8"))
         else:
             self.setHeaders(500)
     # POST
     def do_POST(self):
+        lu.log("Post Request - " + self.path)
         fp=self.rfile
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         filePath=re.sub("%20"," ",filePath)
@@ -117,11 +120,15 @@ class handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(html.encode("UTF-8"))
     # deletes a script
     def do_DELETE(self):
+        lu.log("Delete Request - " + self.path)
         self._setHeaders()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
 # run server
 socketserver.TCPServer.allow_reuse_address = True
-httpd = socketserver.TCPServer((addr, port), handler)
+try:
+  httpd = socketserver.TCPServer((addr, port), handler)
+except OSError:
+  lu.error("Port in use - " + str(port))
 lu.log(" Serving @ " + str(addr) + ":" + str(port))
 try:
     broadcastListener = lu.nodeDiscovery("alpha")

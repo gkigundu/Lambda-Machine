@@ -75,34 +75,39 @@ def main():
   else:
     lu.error("You've Chosen not to continue.")
   someAlive=1
-  while someAlive > 0:
-    someAlive=0
+  try:
+    while someAlive > 0:
+      someAlive=0
+      for comp in liveComp:
+        out = comp.getOutput()
+        if out[0]:
+          sys.stdout.write(out[0]+"\n")
+          sys.stdout.flush()
+        if out[1]:
+          sys.stderr.write(out[1]+"\n")
+          sys.stderr.flush()
+      for comp in liveComp:
+        if comp.isAlive() != None:
+          someAlive=someAlive+comp.isAlive()
+        else:
+          someAlive=1
+  except KeyboardInterrupt:
     for comp in liveComp:
-      out = comp.getOutput()
-      if out[0]:
-        sys.stdout.write(out[0])
-        sys.stdout.flush()
-      if out[1]:
-        sys.stderr.write(out[1])
-        sys.stderr.flush()
-    for comp in liveComp:
-      if comp.isAlive() != None:
-        someAlive=someAlive+comp.isAlive()
-      else:
-        someAlive=1
+      lu.log("Killing Process - " + str(comp.subProc.pid))
+      comp.kill()
 def component(comp):
     if(dockerMode):
       lu.log("Docker Mode is not currently implemented.")
     else:
       compPath=os.path.join(DIR, comp)
       if comp == "alpha":
-        print(comp)
+        return lu.subProc("./alpha/Alpha-Server.py")
       elif comp == "lambda-M":
-        print(comp)
+        return lu.subProc("./lambda-M/LambdaMaster-Server.py")
       elif comp == "lambda-m":
-        print(comp)
+        return lu.subProc("./lambda-m/LambdaMinion-Server.py")
       elif comp == "omega":
-        print(comp)
+        return lu.subProc("./omega/Omega-Server.py")
       elif comp == "delta":
         return lu.subProc("./delta/Delta-Database.py")
       else:
