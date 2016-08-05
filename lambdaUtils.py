@@ -1,9 +1,11 @@
 import sys
 import socket
 import ipaddress
-import threading
+import threading, subprocess
 import queue
-from time import sleep
+import time
+import inspect
+import re
 
 ports = {}
 ports["alpha"]             = 26000 # HTTP
@@ -16,11 +18,60 @@ ports["lambda-m"]          = 26004 #
 ports["BroadcastListenerAddr"]    = 26101 # UDP
 ports["Broadcast"]                = 26102 # UDP
 
+## START subproc
+class subProc():
+  errQueue=queue.Queue()
+  outQueue=queue.Queue()
+  subProc=None
+  stdout=None
+  def getOutput(self):
+    time.sleep(.1)
+    out=None
+    err=None
+    if(not self.queuesEmpty()):
+      try:    out=self.outQueue.get(False).strip()
+      except: out=None
+      try:    err=self.errQueue.get(False).strip()
+      except: err=None
+    return (out, err)
+  def queuesEmpty(self):
+    if(self.errQueue.empty() and self.outQueue.empty()):
+      return True
+    else:
+      return False
+  def isAlive(self):
+    if (self.subProc):
+      if (self.subProc.poll() == None):
+        return 1 # alive and running
+      else:
+        return 0 # terminated
+    else:
+      return None # has not been born
+  def waitForSubProc(self):
+    while (self.isAlive() == None):
+      time.sleep(.1)
+  def __init__(self, command):
+    threading.Thread(target=self._subProcess, args=(command,), daemon=True).start()
+    self.waitForSubProc()
+    threading.Thread(target=self._ioQueue, args=(self.subProc.stdout, self.outQueue), daemon=True).start()
+    threading.Thread(target=self._ioQueue, args=(self.subProc.stderr, self.errQueue), daemon=True).start()
+  def _ioQueue(self, pipe, queue):
+    self.waitForSubProc()
+    out=None
+    while(1):
+      for line in pipe:
+        queue.put(str(line.decode("UTF-8")),block=True, timeout=None)
+      if(self.isAlive() == 0):
+        break
+      time.sleep(.1)
+  def _subProcess(self, command):
+    self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+## END subproc
 def log(string):
-    sys.stdout.write("<log>   " + str(string).strip() + "\n")
+    sys.stdout.write("<log> " + getCallerFile() + " : " + str(string).strip() + "\n")
     sys.stdout.flush()
 def error(string, *e):
-    sys.stderr.write("<ERROR> " + str(string) + "\n")
+    sys.stderr.write("<ERROR> " + getCallerFile() + " : " + str(string) + "\n")
     if len(e) > 0:
       sys.stderr.write("============================\n")
       sys.stderr.write(str(e))
@@ -95,26 +146,18 @@ class nodeDiscovery():
   def kill(self):
       # destroys the nodeDiscovery threads
     self.alive=False
-
-def test():
-    nodes=[]
-    for i in range(0,30):
-        nodes.append(nodeDiscovery("cat" + str(i)))
-    sleep (3)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("tableReq".encode("UTF-8"), ("192.168.1.159", ports["omega"]))
-    while 1:
-      data, addr = sock.recvfrom(1024) # 1024
-      print(data.decode("UTF-8"))
-
-  # person = nodeDiscovery("person")
-  # person.listen()
-  # nodes.append(person)
-  #
-  # while 1 :
-  #       msg = person.getMsg()
-  #       if msg != None:
-  #           print(msg)
-            # sleep(1)
+def getCallerFile():
+  # uses stack tracing to return the file name of the calling process
+  try:
+    for i in inspect.stack():
+      for j in i:
+        if(type(j) == str):
+          if re.match(".*.py$", j.strip()) and not re.match(".*lambdaUtils.py$", j.strip()) :
+            j=re.sub(".*/", "", j)
+            j=re.sub(".py", "", j)
+            return j
+  except:
+    return "---"
 if __name__ == '__main__':
-    test()
+    getCallerFile()
+    

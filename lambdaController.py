@@ -3,9 +3,14 @@
 # this script is not necessary to run the Lambda Machine. You may set the componenets up manually.
 # this relys on a terminal emulator like xterm
 
-import subprocess, threading
+# this is an interface to the modules that compose the Lambda Machine
+
+
+import subprocess, threading, queue
 import sys, os
 import re, io
+import time
+
 import lambdaUtils as lu
 
 # help
@@ -74,45 +79,20 @@ def main():
     someAlive=0
     for comp in liveComp:
       out = comp.getOutput()
-      if not out == None:
+      if out[0]:
         sys.stdout.write(out[0])
-        sys.stderr.write(out[1])
         sys.stdout.flush()
+      if out[1]:
+        sys.stderr.write(out[1])
         sys.stderr.flush()
     for comp in liveComp:
       if comp.isAlive() != None:
         someAlive=someAlive+comp.isAlive()
       else:
         someAlive=1
-class component():
-  subProc=None
-  def getOutput(self):
-    if(self.subProc):
-      return "cat" ######### <<<<<
-    return None
-  def isAlive(self):
-    if (self.subProc != None):
-      if (self.subProc.poll() == None):
-        return 1
-      else:
-        return 0
-    else:
-      return None
-  def __init__(self, comp):
+def component(comp):
     if(dockerMode):
       lu.log("Docker Mode is not currently implemented.")
-      # if comp == "alpha":
-      #   print(comp)
-      # elif comp == "lambda-M":
-      #   print(comp)
-      # elif comp == "lambda-m":
-      #   print(comp)
-      # elif comp == "omega":
-      #   print(comp)
-      # elif comp == "delta":
-      #   print(comp)
-      # else:
-      #   lu.error(comp + " not a recognized component")
     else:
       compPath=os.path.join(DIR, comp)
       if comp == "alpha":
@@ -124,11 +104,7 @@ class component():
       elif comp == "omega":
         print(comp)
       elif comp == "delta":
-        self.proc=self.subProcess("./test ") # + compPath
+        return lu.subProc("./delta/Delta-Database.py")
       else:
         lu.error(comp + " not a recognized component")
-  def subProcess(self, command):
-    threading.Thread(target=self._subProcess, args=(command,), daemon=True).start()
-  def _subProcess(self, command):
-    self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 main()

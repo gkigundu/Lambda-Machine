@@ -2,7 +2,9 @@
 
 i=0
 while [ $i -lt 100 ] ; do
-	echo "$i"
+	echo "out:$i" >&1
+	echo "err:$i" >&2
+
 	i=$((i+1))
 	sleep 1
 done

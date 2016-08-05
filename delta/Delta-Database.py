@@ -41,17 +41,17 @@ def main():
 
         # run elastic search in python wrapper
         command = "bash " + databaseDir + "/bin/elasticsearch"
-        command = command.split(" ")
-        proc = subprocess.Popen(command , stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        broadcastListener = lu.nodeDiscovery("delta")
-        # outputs server logs
-        while (1):
-            for line in iter(proc.stdout.readline,''):
-                if(len(line) > 0):
-                    lu.log(line.decode("utf-8").rstrip() )
+        proc = lu.subProc(command)
+        while(proc.isAlive() != 0 or not proc.queuesEmpty()):
+          out=proc.getOutput()
+          if out[0]:
+            lu.log(out[0])
+          if out[1]:
+            lu.error(out[1])
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:
         lu.log("Keyboard interrupt. Shutting Down.")
         proc.kill()
 main()
+
