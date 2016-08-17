@@ -15,10 +15,8 @@ https://www.elastic.co/products/elasticsearch
 ====================
 == Project Info
 ====================
-This is a brand new project. I am working to collect assets. Please disregard as of now.
-
 Started : 6  July 2016
-Revised : 19 July 2016
+Revised : 5  Aug  2016
 Version : 0.04
 
 Project Layout:
