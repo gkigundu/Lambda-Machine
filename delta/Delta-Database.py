@@ -62,4 +62,5 @@ def main():
     except KeyboardInterrupt as e:
         lu.log("Keyboard interrupt. Shutting Down.")
         proc.kill()
+broadcaster = lu.nodeDiscovery("Delta")
 main()

@@ -126,8 +126,8 @@ try:
     socketserver.TCPServer.allow_reuse_address = True
     httpd = socketserver.TCPServer((addr, port), handler)
     broadcastListener = lu.nodeDiscovery("alpha")
-    httpd.serve_forever()
     lu.log(" Serving @ " + str(addr) + ":" + str(port))
+    httpd.serve_forever()
 except OSError:
     lu.error("Port in use - " + str(port))
 except KeyboardInterrupt:

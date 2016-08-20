@@ -36,39 +36,23 @@ def main():
 #   Minion Object
 # ==========================
 class minion():
-    UDPtimout=1
+    ID=None
+    OmegaAddr=None
     def __init__(self):
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
-        self.omegaSerLoc = self._getOmegaSerLoc()
+        self.OmegaAddr=lu.getOmegaAddr(self.addr)
         self.ID = self._getMinionID()
     # find out where the Omega Server is
     def _getMinionID(self):
         # print('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber')
-        requestURL='http://'+str(self.omegaSerLoc)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'
+        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'
         lu.log("Requesting " + requestURL)
         with urllib.request.urlopen(requestURL) as response:
             minionID = response.read().decode("UTF-8")
             lu.log("Got Minion ID : "+ minionID)
         return minionID
-    def _getOmegaSerLoc(self):
-        omegaBroadcastReceived = False
-        while not omegaBroadcastReceived:
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.settimeout(self.UDPtimout)
-                lu.log("Binding to " + str((self.addr, lu.ports["BroadcastListenerAddr"])))
-                sock.bind((self.addr, lu.ports["BroadcastListenerAddr"])) # UDP
-                data, addr = sock.recvfrom(1024)
-                if(len(data) > 0):
-                    omegaBroadcastReceived = True
-            except socket.timeout as e:
-                lu.log("Could not get Omega Server Address. Retrying")
-        sock.close()
-        # print(data)
-        addr=data.decode("UTF-8").split(" ")
-        lu.log("Got Address : " + addr[0])
-        return addr[0]
+
 
 
 

@@ -62,7 +62,7 @@ def main():
   setup=[]
   error=[]
   for arg in compList:
-    arg=re.sub("[^a-zA-Z0-9]", "", arg) # remove any none num or alpha char
+    arg=re.sub("[^a-zA-Z0-9\-]", "", arg) # remove any none num or alpha char
     if arg in components:
       setup.append(arg)
     else:

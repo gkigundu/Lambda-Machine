@@ -4,6 +4,7 @@ import sys, os
 import calendar, time
 import threading, socket
 import socketserver, http.server
+import queue
 
 # ==========================
 #   Import lambdaUtils
@@ -25,39 +26,20 @@ class networkTable():
     def __init__(self):
         self.networkTable=[]
     def getMinionNumber(self):
+        # returns nex available minion number
         self.minionNumber=self.minionNumber+1
         return self.minionNumber
     def updateEntry(self, ip, name, time):
-        updated = 0
         for i in range(0, len(self.networkTable)):
-            if(self.networkTable[i][1] == name):
+            if(self.networkTable[i][1] == name): # update existing entities
                 self.networkTable[i][0] = ip
-                self.networkTable[i][2]=time
+                self.networkTable[i][2] = time
                 updated = 1
-            if(updated == 1):
-                break
-        if(updated == 0):
-            self.networkTable.append([ip, name, time])
+                return
+        self.networkTable.append([ip, name, time]) # append to tabe if entity does not exist
+        return
     def getTable(self):
         return self.networkTable
-
-# ==========================
-#   Main Method
-# ==========================
-def main():
-    global table
-    table = networkTable()
-    # get messages over UDP to update networkTable
-    broadcastListener = lu.nodeDiscovery("omega")
-    broadcastListener.listen()
-    tableRequestObj = tableRequest()
-    # get UDP pings from network to create Network table entries
-    lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["Broadcast"]))
-    while 1 :
-        msg = broadcastListener.getMsg()
-        if msg != None:
-            info=msg.split(" ")
-            table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
 
 # ==========================
 #   Table Requests
@@ -82,7 +64,6 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
     def do_GET(self): # check if contained to directory
         lu.log("Handling the Request to : " + self.path)
-
         if(self.path == "/"):
             self.setHeaders(200)
             self.wfile.write(str("Please Request a proper path. Try : "+self.properPath).encode("UTF-8"))
@@ -94,5 +75,66 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
         else:
             self.setHeaders(500)
+
+# ==========================
+#   OmegaNodeDiscovery
+# ==========================
+class OmegaNodeDiscovery(lu.nodeDiscovery):
+    def __init__(self, name):
+        self.name=name
+        self.addr=lu.getAddr()
+        # only one listener per computer. This will be used by the omega server to broadcast its address. UDP
+        #      otherwise : " OSError: [Errno 98] Address already in use "
+        self.readBuffer=queue.Queue(maxsize=self.queueSize)
+        # listens to the broadcast messages and adds them to queue. UDP
+        listenThread = threading.Thread(target=self._listen, args = ())
+        listenThread.start()
+        # # broadcast the omega server's address on subnet
+        broadcastThread = threading.Thread(target=self._broadcast, args = (lu.ports["OmegaBroadcast"],))
+        broadcastThread.start()
+    def _broadcast(self, port):
+          # continually sends out ping messages with the clients ip addr and name. UDP
+        msg=str(self.addr)+" "+str(self.name)
+        lu.log("Broadcasting on port : " + str(port) )
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        while self.alive:
+            for addr in self.broadcastAddr:
+                sock.sendto(msg.encode("UTF-8"), (str(addr), port))
+        sleep(self.sleepTime)
+    def _listen(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((self.addr, lu.ports["OmegaListen"])) # UDP
+        while self.alive:
+            data, addr = sock.recvfrom(1024)
+            if not self.readBuffer.full():
+                self.readBuffer.put(data.decode("UTF-8"))
+            else:
+                self.readBuffer.get()
+                lu.log("Queue overflow. Dropping datagram.")
+    def getMsg (self):
+    # returns the most recent broadcast message in the queue
+        if not self.readBuffer.empty():
+            return self.readBuffer.get()
+        else:
+            return None
+# ==========================
+#   Main Method
+# ==========================
+def main():
+    # make network Table
+    global table
+    table = networkTable()
+    # get messages over UDP to update networkTable
+    broadcastListener = OmegaNodeDiscovery("omega")
+    tableRequestObj = tableRequest()
+    # get UDP pings from network to create Network table entries
+    lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["OmegaListen"]))
+    while 1 :
+        msg = broadcastListener.getMsg()
+        if msg != None:
+            info=msg.split(" ")
+            table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
+
 
 main()
