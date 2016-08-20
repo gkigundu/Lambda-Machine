@@ -4,18 +4,27 @@ import urllib.request
 import sys, os, zipfile
 import subprocess
 
+# ==========================
+#   Import lambdaUtils
+# ==========================
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
+# ==========================
+#   Init Setup
+# ==========================
 port=lu.ports["delta"]
 addr=lu.getAddr()
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
 databaseDir=filePath+"/elasticsearch-2.3.4"
 outputZip=filePath+"/master.zip"
 
+# ==========================
+#   Main Function
+# ==========================
 def main():
     try:
         # setup elastic search
@@ -54,4 +63,3 @@ def main():
         lu.log("Keyboard interrupt. Shutting Down.")
         proc.kill()
 main()
-

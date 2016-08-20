@@ -5,22 +5,21 @@ import calendar, time
 import threading, socket
 import socketserver, http.server
 
+# ==========================
+#   Import lambdaUtils
+# ==========================
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-# args=sys.argv[1:]
-# for i in range(len(args)):
-#     if (args[i] == "-p"):
-#         port = int(args[i+1])
-#     if (args[i] == "-a"):
-#         addr = str(args[i+1])
-
+# ==========================
+#   Network Table
+# ==========================
+# stores all of the active hosts on the network.
 table = None
 class networkTable():
-    # stores all of the active hosts on the network.
     minionNumber=0
     networkTable=None
     def __init__(self):
@@ -42,6 +41,9 @@ class networkTable():
     def getTable(self):
         return self.networkTable
 
+# ==========================
+#   Main Method
+# ==========================
 def main():
     global table
     table = networkTable()
@@ -57,6 +59,9 @@ def main():
             info=msg.split(" ")
             table.updateEntry(info[0], info[1], int(calendar.timegm(time.gmtime())))
 
+# ==========================
+#   Table Requests
+# ==========================
 # implements a network handler for handling network table requests. returns a python list with http headers. TCP based
 class tableRequest():
   addr=lu.getAddr()

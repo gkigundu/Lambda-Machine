@@ -7,18 +7,23 @@ import time
 import inspect
 import re
 
+# ==========================
+#   Static Ports
+# ==========================
 ports = {}
 ports["alpha"]             = 26000 # HTTP
 ports["omega"]             = 26001 # HTTP
-ports["delta"]             = 26002 #
-# ports["lambda-M"]          = 26003 #
-ports["lambda-m"]          = 26004 #
+ports["delta"]             = 9200  # TCP - Elastic
+ports["lambda-M"]          = 26003 # TCP
+ports["lambda-m"]          = 26004 # TCP
 
 # used for host discovery
 ports["BroadcastListenerAddr"]    = 26101 # UDP
 ports["Broadcast"]                = 26102 # UDP
 
-## START subproc
+# ==========================
+#   Sub Process
+# ==========================
 class subProc():
   errQueue=queue.Queue() # stderr
   outQueue=queue.Queue() # stdout
@@ -95,6 +100,9 @@ def getAddr():
   s.connect(("8.8.8.8", 80))
   return s.getsockname()[0]
 
+# ==========================
+#  Node Discovery
+# ==========================
 class nodeDiscovery():
     # Interprocess communication
     # served over UDP
@@ -158,6 +166,9 @@ class nodeDiscovery():
   def kill(self):
       # destroys the nodeDiscovery threads
     self.alive=False
+# ==========================
+#   Helper Functions
+# ==========================
 def getCallerFile():
   # uses stack tracing to return the file name of the calling process
   try:
@@ -170,6 +181,8 @@ def getCallerFile():
             return j
   except:
     return "---"
+# ==========================
+#   Main file execution
+# ==========================
 if __name__ == '__main__':
-    getCallerFile()
-    
+    print("This file is meant for importation")

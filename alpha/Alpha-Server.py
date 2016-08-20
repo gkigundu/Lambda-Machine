@@ -1,40 +1,30 @@
 #!/usr/bin/env python3
 
-# Difficulties:
-#     posting data to server using a form
-
-# to do
-#       binary file transfer            x
-#       post binary file                cant be done via xhr
-#       delete files
-#       allow user to upload file with really long name that's all one word
-#            Like : ThisIsAReallyLongName.WhoNamesSomethingLikeThis.why
-#       run file content view
-
-# notes
-#       uploads and downloads appear solid
-#           395707350c8a6363a23788a0fd5c49ed  _archive (1).sh
-#           395707350c8a6363a23788a0fd5c49ed  _archive.sh
-
-
 import http.server
 import socketserver
 import signal
 import sys, os, re
 import cgi
 
+# ==========================
+#   Import lambdaUtils
+# ==========================
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-# Global Defaults
+# ==========================
+#   Global Defaults
+# ==========================
 port=lu.ports["alpha"]
 addr=lu.getAddr()
 codeDir = "codeScrolls"
 
-# get args
+# ==========================
+#   Parse Args
+# ==========================
 args=sys.argv[1:]
 for i in range(len(args)):
     if (args[i] == "-p"):
@@ -42,10 +32,15 @@ for i in range(len(args)):
     if (args[i] == "-a"):
         addr = str(args[i+1])
 
-# checks
+# ==========================
+#   Init Setup
+# ==========================
 if not os.path.exists(codeDir):
     os.makedirs(codeDir)
 
+# ==========================
+#   Main user front end server
+# ==========================
 class handler(http.server.BaseHTTPRequestHandler):
     # set http headers
     def setHeaders(self, code):
@@ -123,15 +118,17 @@ class handler(http.server.BaseHTTPRequestHandler):
         lu.log("Delete Request - " + self.path)
         self._setHeaders()
         self.wfile.write(b"<html><body><h1>delete!</h1></body></html>")
-# run server
-socketserver.TCPServer.allow_reuse_address = True
+
+# ==========================
+#   Iniitialize
+# ==========================
 try:
-  httpd = socketserver.TCPServer((addr, port), handler)
-except OSError:
-  lu.error("Port in use - " + str(port))
-lu.log(" Serving @ " + str(addr) + ":" + str(port))
-try:
+    socketserver.TCPServer.allow_reuse_address = True
+    httpd = socketserver.TCPServer((addr, port), handler)
     broadcastListener = lu.nodeDiscovery("alpha")
     httpd.serve_forever()
+    lu.log(" Serving @ " + str(addr) + ":" + str(port))
+except OSError:
+    lu.error("Port in use - " + str(port))
 except KeyboardInterrupt:
     sys.exit(0)

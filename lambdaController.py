@@ -26,7 +26,9 @@ skipVerification=0
 compList=[]
 termEmulator=""
 
-# parse args
+# ==========================
+#   Parse Args
+# ==========================
 args=sys.argv[1:]
 i=0
 while i < len(args):
@@ -44,11 +46,16 @@ while i < len(args):
     compList.append(args[i])
   i=i+1
 
-# options log
+# ==========================
+#   Option Log
+# ==========================
 lu.log("Docker Mode Enabled : " + str(bool(dockerMode)))
 lu.log("Skip Verification messages : " + str(bool(skipVerification)))
 lu.log("Specified component list : " + str(compList))
 
+# ==========================
+#   Main Method
+# ==========================
 def main():
   global termEmulator
   components=["alpha","lambda-M","lambda-m","omega","delta"]
@@ -95,6 +102,9 @@ def main():
     for comp in liveComp:
       lu.log("Killing Process - " + str(comp.subProc.pid))
       comp.kill()
+# =================================
+#   Component that can be run
+# =================================
 def component(comp):
     if(dockerMode):
       lu.log("Docker Mode is not currently implemented.")

@@ -3,12 +3,19 @@
 import sys, os
 import socket
 import urllib.request
+
+# ==========================
+#   Import lambdaUtils
+# ==========================
 filePath=os.path.abspath(os.path.join(os.path.dirname(__file__)))
 rootPath=os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
+# ==========================
+#   Parse Args
+# ==========================
 args=sys.argv[1:]
 for i in range(len(args)):
     if (args[i] == "-p"):
@@ -16,12 +23,18 @@ for i in range(len(args)):
     if (args[i] == "-a"):
         addr = str(args[i+1])
 
+# ==========================
+#   Main Function
+# ==========================
 def main():
     # make a friendly minion to work for you
     myMinion = minion()
     # start broadcasting his address
     broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID)
 
+# ==========================
+#   Minion Object
+# ==========================
 class minion():
     UDPtimout=1
     def __init__(self):
