@@ -49,7 +49,7 @@ def main():
         lu.log("=================")
 
         # run elastic search in python wrapper
-        command = "bash " + databaseDir + "/bin/elasticsearch"
+        command = "bash " + databaseDir + "/bin/elasticsearch --network.host " + addr
         proc = lu.subProc(command)
         while(proc.isAlive() != 0 or not proc.queuesEmpty()):
           out=proc.getOutput()

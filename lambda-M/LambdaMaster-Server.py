@@ -2,7 +2,7 @@
 
 # pushes data from alpha to minions
 
-import sys
+import sys, os
 
 # ==========================
 #   Import lambdaUtils
@@ -36,9 +36,10 @@ def main():
     broadcastListener = lu.nodeDiscovery("Lambda-M")
 
 # ==========================
-#   
+#
 # ==========================
 class network:
     # Receive a program to be redirected to Lambda-m
-    def listenForAlpha:
+    def receiveScript(self):
+        print()
 main()
