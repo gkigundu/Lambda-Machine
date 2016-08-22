@@ -115,7 +115,7 @@ def getOmegaAddr(addr):
             data, addr = sock.recvfrom(1024)
             if(len(data) > 0):
                 omegaBroadcastReceived = True
-        except:
+        except  :
             pass
             #log("Could not get Omega Server Address. Retrying")
     sock.close()
