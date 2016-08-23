@@ -30,20 +30,26 @@ def main():
     # make a friendly minion to work for you
     myMinion = minion()
     # start broadcasting his address
-    broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID)
-
+    if(myMinion.listenPort):
+        broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, myMinion.listenPort)
+    else:
+        lu.error("Could not get minion port")
 # ==========================
 #   Minion Object
 # ==========================
 class minion():
     ID=None
     OmegaAddr=None
+    listenPort=_getMinionPort()
     def __init__(self):
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.OmegaAddr=lu.getOmegaAddr(self.addr)
         self.ID = self._getMinionID()
     # find out where the Omega Server is
+    def _getMinionPort(self):
+        # MAKE TCP SOCET TO RECEIIVE SCRIPTS
+        return None
     def _getMinionID(self):
         # print('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber')
         requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'

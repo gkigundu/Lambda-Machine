@@ -8,19 +8,40 @@ import inspect
 import re
 
 # ==========================
+#   Global Variables
+# ==========================
+subNet="192.168.1.0/24"
+
+# ==========================
 #   Static Ports
 # ==========================
 ports = {}
-ports["alpha"]             = 26000 # HTTP
-ports["omega"]             = 26001 # HTTP
-ports["delta"]             = 9200  # TCP - Elastic
-ports["lambda-M"]          = 26003 # TCP
-ports["lambda-m"]          = 26004 # TCP
+ports["alpha"]             = 26000 # HTTP   # HTTP Website frontend
+ports["omega"]             = 26001 # HTTP   # Network Table and Minion ID requests
+ports["delta"]             = 9200  # TCP    # Elastic Database Access Point
+ports["lambda-M"]          = 26003 # TCP    # push scripts for distribution
+ports["lambda-m"]          = 26004 # TCP    # 
 
 # used for host discovery
-ports["OmegaListen"]    = 26101 # UDP
-ports["OmegaBroadcast"]    = 26102 # UDP # sends omega server to subnet
-# ports["BroadcastWriter"]    = 26102 # UDP
+ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
+ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subnet
+
+
+# ==========================
+#   Helper Functions
+# ==========================
+def getCallerFile():
+  # uses stack tracing to return the file name of the calling process
+  try:
+    for i in inspect.stack():
+      for j in i:
+        if(type(j) == str):
+          if re.match(".*.py$", j.strip()) and not re.match(".*lambdaUtils.py$", j.strip()) :
+            j=re.sub(".*/", "", j)
+            j=re.sub(".py", "", j)
+            return j
+  except:
+    return "---"
 
 # ==========================
 #   Sub Process
@@ -98,9 +119,19 @@ def error(string, *e):
 def getAddr():
     # returns LAN address
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  s.connect(("8.8.8.8", 80))
-  return s.getsockname()[0]
-
+  try:	
+    s.connect(("8.8.8.8", 80))
+    log("Connect to internet. Using address : " + s.getsockname()[0])
+    return s.getsockname()[0]
+  except OSError:
+    global subNet
+    log("Could not connect to internet. Using localhost 127.0.0.1")
+    subNet="127.0.0.1/32"
+    return "127.0.0.1"
+  except:
+    error("Could not get address.")
+def getSubnet():
+	return ipaddress.ip_network(subNet)
 # ==========================
 #  Node Discovery
 # ==========================
@@ -127,53 +158,35 @@ def getOmegaAddr(addr):
 class nodeDiscovery():
     # Interprocess communication
     # served over UDP
-    broadcastAddr=ipaddress.ip_network('192.168.1.0/24')
-    sleepTime=0.1
+    sleepTime=5
     alive=True
     queueSize=20
     UDPtimout=500
     omegaAddr=None
-    def __init__(self,name):
+    port=None
+    addr=getAddr()
+    broadcastAddr=getSubnet()
+    def __init__(self, name, *port):
         # initializes a multicast UDP socket and broadcasts the nodes ip address to the subnet.
         #   It also listens for incoming messages
         self.name=name
-        self.addr=getAddr()
         self.omegaAddr=getOmegaAddr(self.addr)
+        self.port=port
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
     def _informOmega(self):
           # continually sends out ping messages with the clients ip addr and name. UDP
         msg=str(self.addr)+" "+str(self.name)
+        if(self.port):
+            msg.append(self.port)
         while self.alive:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             sock.sendto(msg.encode("UTF-8"), (self.omegaAddr, ports["OmegaListen"]))
             time.sleep(self.sleepTime)
-    def sendMsg(self):
-          # temporary may not be implemented.
-        if self.alive:
-          for addr in self.broadcastAddr:
-            self.sock.sendto(msg.encode("UTF-8"), (str(addr), self.broadcastPort))
-          return 0
-        return -1
     def kill(self):
       # destroys the nodeDiscovery threads
       self.alive=False
-# ==========================
-#   Helper Functions
-# ==========================
-def getCallerFile():
-  # uses stack tracing to return the file name of the calling process
-  try:
-    for i in inspect.stack():
-      for j in i:
-        if(type(j) == str):
-          if re.match(".*.py$", j.strip()) and not re.match(".*lambdaUtils.py$", j.strip()) :
-            j=re.sub(".*/", "", j)
-            j=re.sub(".py", "", j)
-            return j
-  except:
-    return "---"
 # ==========================
 #   Main file execution
 # ==========================
