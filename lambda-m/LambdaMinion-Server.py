@@ -40,7 +40,7 @@ def main():
 class minion():
     ID=None
     OmegaAddr=None
-    listenPort=_getMinionPort()
+    listenPort=self._getMinionPort()
     def __init__(self):
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
