@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import sys, os
-import socket
+import socket, socketserver
 import urllib.request
+import threading
+import time
 
 # ==========================
 #   Import lambdaUtils
@@ -14,51 +16,47 @@ import lambdaUtils as lu
 os.chdir(filePath)
 
 # ==========================
-#   Parse Args
-# ==========================
-args=sys.argv[1:]
-for i in range(len(args)):
-    if (args[i] == "-p"):
-        port = int(args[i+1])
-    if (args[i] == "-a"):
-        addr = str(args[i+1])
-
-# ==========================
 #   Main Function
 # ==========================
 def main():
     # make a friendly minion to work for you
-    myMinion = minion()
+    myMinion = Minion()
     # start broadcasting his address
-    if(myMinion.listenPort):
-        broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, myMinion.listenPort)
-    else:
-        lu.error("Could not get minion port")
+    while ( not myMinion.listenPort ):
+        time.sleep(.5)
+    broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, str(myMinion.listenPort))
 # ==========================
 #   Minion Object
 # ==========================
-class minion():
+class Minion():
     ID=None
     OmegaAddr=None
-    listenPort=self._getMinionPort()
+    TCPScriptReceival=None
+    listenPort=None
     def __init__(self):
         self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.OmegaAddr=lu.getOmegaAddr(self.addr)
         self.ID = self._getMinionID()
-    # find out where the Omega Server is
-    def _getMinionPort(self):
-        # MAKE TCP SOCET TO RECEIIVE SCRIPTS
-        return None
+        self._startScriptReceival = threading.Thread(target=self._startScriptReceival).start()
+    def _startScriptReceival(self):
+        self.TCPScriptReceival=socketserver.TCPServer((self.addr, 0), MinionTCP_Handler)
+        self.listenPort=str(self.TCPScriptReceival.server_address[1])
+        lu.log("Minion " + str(self.ID) +" got listening port : " + self.listenPort)
+        self.TCPScriptReceival.serve_forever()
     def _getMinionID(self):
-        # print('http://'+str(self.addr)+':'+str(self.port)+'/lambdaMinionNumber')
         requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'
         lu.log("Requesting " + requestURL)
         with urllib.request.urlopen(requestURL) as response:
             minionID = response.read().decode("UTF-8")
             lu.log("Got Minion ID : "+ minionID)
         return minionID
-
+class MinionTCP_Handler(socketserver.BaseRequestHandler):
+    def handle(self):
+        self.data = self.request.recv(1024).strip()
+        print("{} wrote:".format(self.client_address[0]))
+        print(self.data)
+        # self.request.sendall(self.data.upper())
 
 
 

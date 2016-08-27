@@ -53,8 +53,7 @@ class tableRequest():
   def __init__(self):
     socketserver.TCPServer.allow_reuse_address = True
     tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)
-    broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,))
-    broadcastThread.start()
+    broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()
     lu.log(" Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
   def _threadServe(self, httpd):
     httpd.serve_forever()
@@ -137,13 +136,18 @@ def main():
     while broadcastListener.alive :
         msg = broadcastListener.getMsg()
         if msg:
-            info=msg.split(" ")
-            info=[info[0], info[1], int(calendar.timegm(time.gmtime()))]
-            try:
-                info.append(info[2])
+            info         =msg.split(" ")
+            ipAddr       =info[0]
+            name         =info[1]
+            epochTime    =int(calendar.timegm(time.gmtime()))
+            port         =None
+            try:    port =info[2]
             except: pass
+            info=[ipAddr, name, epochTime]
+            if(port):
+                info.append(port)
             table.updateEntry(info)
         else:
-            time.sleep(.1)
-
+            time.sleep(1)
+            print(table.getTable())
 main()

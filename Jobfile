@@ -6,4 +6,5 @@ push:
 	git push --repo=git@github.com:XDerekMaierX/$(pwd | sed 's/.*\///g').git -q
 viewChanges:
 	git log -p
-
+wordCountPy:
+    find -name "*.py" -exec cat {} \; | grep -v "^$" | wc -l

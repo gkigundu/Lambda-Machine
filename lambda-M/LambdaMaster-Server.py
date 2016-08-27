@@ -20,25 +20,16 @@ port=lu.ports["lambda-M"]
 addr=lu.getAddr()
 
 # ==========================
-#   Parse Args
-# ==========================
-args=sys.argv[1:]
-for i in range(len(args)):
-    if (args[i] == "-p"):
-        port = int(args[i+1])
-    if (args[i] == "-a"):
-        addr = str(args[i+1])
-
-# ==========================
 #   Main function
 # ==========================
 def main():
+    master = Master()
     broadcastListener = lu.nodeDiscovery("Lambda-M")
 
 # ==========================
-#
+#   Master
 # ==========================
-class network:
+class Master:
     # Receive a program to be redirected to Lambda-m
     def receiveScript(self):
         print()

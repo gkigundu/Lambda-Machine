@@ -20,7 +20,7 @@ ports["alpha"]             = 26000 # HTTP   # HTTP Website frontend
 ports["omega"]             = 26001 # HTTP   # Network Table and Minion ID requests
 ports["delta"]             = 9200  # TCP    # Elastic Database Access Point
 ports["lambda-M"]          = 26003 # TCP    # push scripts for distribution
-ports["lambda-m"]          = 26004 # TCP    # 
+ports["lambda-m"]          = 26004 # TCP    #
 
 # used for host discovery
 ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
@@ -119,7 +119,7 @@ def error(string, *e):
 def getAddr():
     # returns LAN address
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  try:	
+  try:
     s.connect(("8.8.8.8", 80))
     log("Connect to internet. Using address : " + s.getsockname()[0])
     return s.getsockname()[0]
@@ -171,14 +171,15 @@ class nodeDiscovery():
         #   It also listens for incoming messages
         self.name=name
         self.omegaAddr=getOmegaAddr(self.addr)
-        self.port=port
+        try:    self.port=port[0]
+        except: pass
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
     def _informOmega(self):
           # continually sends out ping messages with the clients ip addr and name. UDP
         msg=str(self.addr)+" "+str(self.name)
         if(self.port):
-            msg.append(self.port)
+            msg+=" " + self.port
         while self.alive:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
