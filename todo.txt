@@ -11,13 +11,20 @@
 [] debug tab
 [] script folders
 [] execute functionality
+[x] async xhr calls
 
+==================
+	index
+==================
+[] fix scroll overflow in list hierarchy
+[] add logo
+[] make top buttons nice looking
 
 ==================
 	Lambda-m
 ==================
 [] receive scripts
-[] status log to delta
+[] status log
 
 
 ==================
@@ -30,3 +37,4 @@
 ==================
 	Delta
 ==================
+[] provide database info hierarchy

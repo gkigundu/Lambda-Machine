@@ -9,6 +9,7 @@ import calendar, time
 import threading, socket
 import socketserver, http.server
 import queue
+import json
 
 # ==========================
 #   Import lambdaUtils
@@ -75,6 +76,16 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         elif(self.path == lu.paths["omega_Table"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getTable()).encode("UTF-8"))
+        elif(self.path == lu.paths["omega_TableJSON"]):
+            self.setHeaders(200)
+            tableJSON=[]
+            for i in table.getTable():
+                try:
+                    tableJSON.append(dict({"name":i[1],"addr":i[0],"time":i[2],"port":i[3]})) # make this a better test
+                except:
+                    tableJSON.append(dict({"name":i[1],"addr":i[0],"time":i[2]}))
+
+            self.wfile.write(str(json.dumps(tableJSON)).encode("UTF-8"))
         elif(self.path == lu.paths["omega_MinionTable"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
@@ -138,6 +149,7 @@ def main():
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["OmegaListen"]))
     while broadcastListener.alive :
+        table.updateEntry([broadcastListener.addr, "omega", int(calendar.timegm(time.gmtime()))])
         msg = broadcastListener.getMsg()
         if msg:
             info         =msg.split(" ")

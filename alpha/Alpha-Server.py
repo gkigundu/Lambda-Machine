@@ -6,6 +6,8 @@
 import http.server
 import socketserver
 import signal
+import urllib.request
+
 import sys, os, re
 import cgi
 
@@ -44,6 +46,8 @@ if not os.path.exists(codeDir):
 # ==========================
 #   Main user front end server
 # ==========================
+addr=lu.getAddr()
+OmegaAddr=lu.getOmegaAddr(addr)
 class handler(http.server.BaseHTTPRequestHandler):
     # set http headers
     def setHeaders(self, code):
@@ -66,7 +70,15 @@ class handler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
-        if os.path.isfile(filePath):
+        if (self.path == lu.paths["alpha_nodeListing"]): # node
+            self.setHeaders(200)
+            requestURL='http://'+str(OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_TableJSON"]
+            lu.log("Requesting " + requestURL)
+            msg=None
+            with urllib.request.urlopen(requestURL) as response:
+                msg = response.read().decode("UTF-8")
+            self.wfile.write(msg.encode("UTF-8"))
+        elif os.path.isfile(filePath):
             self.setHeaders(200)
             self.writeDataToHandler(filePath)
         elif os.path.isdir(filePath):
