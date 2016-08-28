@@ -19,13 +19,21 @@ ports = {}
 ports["alpha"]             = 26000 # HTTP   # HTTP Website frontend
 ports["omega"]             = 26001 # HTTP   # Network Table and Minion ID requests
 ports["delta"]             = 9200  # TCP    # Elastic Database Access Point
-ports["lambda-M"]          = 26003 # TCP    # push scripts for distribution
-ports["lambda-m"]          = 26004 # TCP    #
+ports["lambda-M"]          = 26003 # HTTP   # push scripts for distribution
+# ports["lambda-m"]        = 26004 # TCP    # Lambda minions generate their own TCP socket address
 
 # used for host discovery
 ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
 ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subnet
 
+# ==========================
+#   Global Paths
+# ==========================
+paths = {}
+paths["omega_Table"]            = "/table"              # GET
+paths["omega_MinionTable"]      = "/lambdaMinionNumber" # GET
+paths["master_ClusterStat"]     = "/clusterStatus"      # GET
+paths["master_postScript"]      = "/postScript"         # POST
 
 # ==========================
 #   Helper Functions
@@ -42,7 +50,32 @@ def getCallerFile():
             return j
   except:
     return "---"
-
+def log(string):
+    sys.stdout.write("<log> " + getCallerFile() + " : " + str(string).strip() + "\n")
+    sys.stdout.flush()
+def error(string, *e):
+    sys.stderr.write("<ERROR> " + getCallerFile() + " : " + str(string) + "\n")
+    if len(e) > 0:
+      sys.stderr.write("============================\n")
+      sys.stderr.write(str(e))
+    sys.stderr.flush()
+    sys.exit(1)
+def getAddr():
+    # returns LAN address
+  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  try:
+    s.connect(("8.8.8.8", 80))
+    log("Connect to internet. Using address : " + s.getsockname()[0])
+    return s.getsockname()[0]
+  except OSError:
+    global subNet
+    log("Could not connect to internet. Using localhost 127.0.0.1")
+    subNet="127.0.0.1/32"
+    return "127.0.0.1"
+  except:
+    error("Could not get address.")
+def getSubnet():
+	return ipaddress.ip_network(subNet)
 # ==========================
 #   Sub Process
 # ==========================
@@ -105,33 +138,6 @@ class subProc():
   def _subProcess(self, command):
     # execute sub process from a thread.
     self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-## END subproc
-def log(string):
-    sys.stdout.write("<log> " + getCallerFile() + " : " + str(string).strip() + "\n")
-    sys.stdout.flush()
-def error(string, *e):
-    sys.stderr.write("<ERROR> " + getCallerFile() + " : " + str(string) + "\n")
-    if len(e) > 0:
-      sys.stderr.write("============================\n")
-      sys.stderr.write(str(e))
-    sys.stderr.flush()
-    sys.exit(1)
-def getAddr():
-    # returns LAN address
-  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  try:
-    s.connect(("8.8.8.8", 80))
-    log("Connect to internet. Using address : " + s.getsockname()[0])
-    return s.getsockname()[0]
-  except OSError:
-    global subNet
-    log("Could not connect to internet. Using localhost 127.0.0.1")
-    subNet="127.0.0.1/32"
-    return "127.0.0.1"
-  except:
-    error("Could not get address.")
-def getSubnet():
-	return ipaddress.ip_network(subNet)
 # ==========================
 #  Node Discovery
 # ==========================

@@ -1,0 +1,10 @@
+
+Posting scripts from Alpha to Master JSON fomating
+{
+    "nodes" : {
+        "NodeName1", "NodeName2", "NodeName3"
+    },
+    "stdin"   : "/pathTo/input",
+    "stdout"  : "/pathTo/input",
+    "payload" : " --- SCRIPT PAYLOAD --- "
+}

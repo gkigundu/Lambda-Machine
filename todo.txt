@@ -1,34 +1,30 @@
 ==================
 	Omega
 ==================
-- add listening port to table entry
-
-
+[x] add listening port to table entry
 
 
 ==================
 	Alpha
 ==================
-- lambda-m node tab
-- debug tab
-- script folders
-- execute functionality
-
-
+[] lambda-m node tab
+[] debug tab
+[] script folders
+[] execute functionality
 
 
 ==================
 	Lambda-m
 ==================
-- receive scripts
-- status log
+[] receive scripts
+[] status log to delta
 
 
 ==================
 	Lambda-M
 ==================
-- receive / distribute scripts to lambda-m
-- anomoly detection
+[] receive / distribute scripts to lambda-m
+[] anomaly detection
 
 
 ==================

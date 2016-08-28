@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Specifications :
+#       1/Many per cluster
+
 import urllib.request
 import sys, os, zipfile
 import subprocess

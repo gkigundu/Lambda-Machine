@@ -16,8 +16,8 @@ https://www.elastic.co/products/elasticsearch
 == Project Info
 ====================
 Started : 6  July 2016
-Revised : 5  Aug  2016
-Version : 0.05
+Revised : 27 Aug  2016
+Version : 0.07
 
 Project Layout:
 https://docs.google.com/document/d/1MHSldaDuANaTkXEBYXXmD2ZgtJQvfWSklaHroLfppU4/edit?usp=sharing

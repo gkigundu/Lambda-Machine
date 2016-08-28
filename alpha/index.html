@@ -1,170 +1,219 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Lambda Machine</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-	<script type="text/javascript">
-	//  =====================
-	//  	START Javascript
-	//  =====================
-	// Checks that required APIs are operational in browser
-	function checkAPIsupport(){
-		log("Checking API support")
-		if (window.File && window.FileReader && window.FileList && window.Blob) {
-		} else {
-			alert('The File APIs are not fully supported in this browser.');
-		}
-		log("Checking API support finished")
-	}
-	// posts a file to the Python web server
-	function postFile(evt){
-		log("Posting File ");
-		var f = evt.target.files[0];
-		fileName = f.name;
-		log("File Name : " + fileName);
-		if (!f) {
-			alert("Failed to load file");
-			error("Failed to load file")
-		} else {
-			var reader = new FileReader();
-			reader.onload = (function(f) {
-				return function(f) {
-					var xhr = new XMLHttpRequest;
-					log("Posting request")
-					xhr.open("POST", "/codeScrolls/" + fileName , false);
-					log("Sending request")
-					xhr.send(f.target.result); // it seems chrome only supports xhr.send which only sends strings. No binary data.
-					getScriptListing();
-				};
-			})(f);
-			reader.readAsBinaryString(f);
-		}
-		log("Posting File finished");
-	}
-	// initializes javascript after the required HTML elements are in place
-	function init(){
-		log("Initializing");
-		document.getElementById('fileInputButton').addEventListener('change', postFile, false);
-		checkAPIsupport();
-		getScriptListing();
-		log("Initializing finished");
-	}
-	// console.log
-	function log(str){
-			console.log("<Log> " + str);
-	}
-	// console.error
-	function error(str){
-			console.error("<ERROR> " + str);
-	}
-	// called when the eye is clicked. This updates the content view div with the file's content.
-	function contentView(fileName){
-		log("Updating Content View");
-		var hierarchyTree = document.getElementById('r2c1');
-		var rows = hierarchyTree.childNodes[0].getElementsByTagName("tr");
-		for (i = 0; i < rows.length; i++) {
-			rows[i].style.backgroundColor = "";
-		}
-		var elem = document.getElementById(fileName);
-		elem.style.backgroundColor = "lightBlue";
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Lambda Machine</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript">
+    //  =====================
+    //  	START Javascript
+    //  =====================
+    // get elements
+    function $(id){
+        return document.getElementById(id)
+    }
+    // Checks that required APIs are operational in browser
+    function checkAPIsupport(){
+        log("Checking API support")
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+        } else {
+            alert('The File APIs are not fully supported in this browser.');
+        }
+        log("Checking API support finished")
+    }
+    // posts a file to the Python web server
+    function postFile(evt){
+        log("Posting File ");
+        var f = evt.target.files[0];
+        fileName = f.name;
+        log("File Name : " + fileName);
+        if (!f) {
+            alert("Failed to load file");
+            error("Failed to load file")
+        } else {
+            var reader = new FileReader();
+            reader.onload = (function(f) {
+                return function(f) {
+                    var xhr = new XMLHttpRequest;
+                    log("Posting request")
+                    xhr.open("POST", "/codeScrolls/" + fileName , false);
+                    log("Sending request")
+                    xhr.send(f.target.result); // it seems chrome only supports xhr.send which only sends strings. No binary data.
+                    getScriptListing();
+                };
+            })(f);
+            reader.readAsBinaryString(f);
+        }
+        log("Posting File finished");
+    }
+    // initializes javascript after the required HTML elements are in place
+    function init(){
+        log("Initializing");
+        $('fileInputButton').addEventListener('change', postFile, false);
+        checkAPIsupport();
+        getScriptListing();
+        updatePage("nodes");
+        log("Initializing finished");
+    }
+    // console.log
+    function log(str){
+        console.log("<Log> " + str);
+    }
+    // console.error
+    function error(str){
+        console.error("<ERROR> " + str);
+    }
+    // called when the eye is clicked. This updates the content view div with the file's content.
+    function contentView(fileName){
+        log("Updating Content View");
+        var hierarchyTree = $('r2c1_scripts');
+        var rows = hierarchyTree.childNodes[0].getElementsByTagName("tr");
+        for (i = 0; i < rows.length; i++) {
+            rows[i].style.backgroundColor = "";
+        }
+        var elem = $(fileName);
+        elem.style.backgroundColor = "lightBlue";
 
-		var xhr = new XMLHttpRequest;
-		log("Sending request for file content view");
-		xhr.open("GET", "/codeScrolls/" + fileName, false);
-		xhr.send();
-		var contentView = document.getElementById('contentView')
-		contentView.innerHTML = "<pre>" + xhr.response + "</pre>"
-		log("request for content view finished");
-	}
-	// called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
-	function run(fileName){
-		log("getting content view for running '" + fileName + "'");
-	}
-	// updates the heirarchy view with the scripts found in the python server's codescrolls directory
-	function getScriptListing(){
-		log("Getting script listing");
-		var xhr = new XMLHttpRequest;
-		xhr.open("GET", "/codeScrolls/", false);
-		xhr.send();
-		var hierarchyTree = document.getElementById('r2c1');
-		if(xhr.status == 200){
-			hierarchyTree.innerHTML = xhr.response;
-			var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
-			if(aList.length > 0){
-				log("Found more then zero listings. Updating hierarchy view")
-				var newHierarchyTree = document.createElement("table");
-				for (i = 0; i < aList.length; i++) {
-					var tr  = document.createElement("tr")
-					var td1 = document.createElement("td");
-					var td2 = document.createElement("td");
-					var td3 = document.createElement("td");
-					tr.appendChild(td1);
-					tr.appendChild(td2);
-					tr.appendChild(td3);
-					newHierarchyTree.appendChild(tr)
-					// create nodes
-					var text = document.createElement("p");
-					var view = document.createElement("img");
-					var run  = document.createElement("img");
-					// text node details
-					let imgSize = 20;
-					tr  .setAttribute("id", aList[i].innerHTML);
-					text.setAttribute("style", "text-align:right;");
-					view.setAttribute("style", "text-align : left;");
-					view.setAttribute("src", "/res/view.png");
-					run .setAttribute("src", "/res/run.png");
-					run .setAttribute("width", imgSize);
-					run .setAttribute("height", imgSize);
-					view.setAttribute("width", imgSize);
-					view.setAttribute("height", imgSize);
-					run .setAttribute("onclick", "run        ('" + aList[i].innerHTML + "')");
-					view.setAttribute("onclick", "contentView('" + aList[i].innerHTML + "')");
-					text.innerHTML = aList[i].innerHTML;
-					// append nodes
-					td1.appendChild(view);
-					td2.appendChild(run );
-					td3.appendChild(text);
-				}
-				while (hierarchyTree.firstChild) {
-					log("Cleaning pre existing hierarchy tree")
-					hierarchyTree.removeChild(hierarchyTree.firstChild);
-				}
-				hierarchyTree.appendChild(newHierarchyTree);
-			}else{
-				hierarchyTree.innerHTML = "<p style='text-align:center'>Uploaded Files Will Appear Here.</p>"
-			}
-		}else{
-			error("Could not contact Server.")
-			hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
-		}
-		log("finished getting script listing");
-	}
-	//  =====================
-	//  	END Javascript
-	//  =====================
-	</script>
+        var xhr = new XMLHttpRequest;
+        log("Sending request for file content view");
+        xhr.open("GET", "/codeScrolls/" + fileName, false);
+        xhr.send();
+        var contentView = $('contentView')
+        contentView.innerHTML = "<pre>" + xhr.response + "</pre>"
+        log("request for content view finished");
+    }
+    // called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
+    function run(fileName){
+        log("getting content view for running '" + fileName + "'");
+    }
+    // updates the heirarchy view with the scripts found in the python server's codescrolls directory
+    function getScriptListing(){
+        log("Getting script listing");
+        var xhr = new XMLHttpRequest;
+        xhr.open("GET", "/codeScrolls/", false);
+        xhr.send();
+        var hierarchyTree = $('r2c1_scripts');
+        if(xhr.status == 200){
+            hierarchyTree.innerHTML = xhr.response;
+            var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
+            if(aList.length > 0){
+                log("Found more then zero listings. Updating hierarchy view")
+                var newHierarchyTree = document.createElement("table");
+                for (i = 0; i < aList.length; i++) {
+                    var tr  = document.createElement("tr")
+                    var td1 = document.createElement("td");
+                    var td2 = document.createElement("td");
+                    var td3 = document.createElement("td");
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tr.appendChild(td3);
+                    newHierarchyTree.appendChild(tr)
+                    // create nodes
+                    var text = document.createElement("p");
+                    var view = document.createElement("img");
+                    var run  = document.createElement("img");
+                    // text node details
+                    let imgSize = 20;
+                    tr  .setAttribute("id", aList[i].innerHTML);
+                    text.setAttribute("style", "text-align:right;");
+                    view.setAttribute("style", "text-align : left;");
+                    view.setAttribute("src", "/res/view.png");
+                    run .setAttribute("src", "/res/run.png");
+                    run .setAttribute("width", imgSize);
+                    run .setAttribute("height", imgSize);
+                    view.setAttribute("width", imgSize);
+                    view.setAttribute("height", imgSize);
+                    run .setAttribute("onclick", "run        ('" + aList[i].innerHTML + "')");
+                    view.setAttribute("onclick", "contentView('" + aList[i].innerHTML + "')");
+                    text.innerHTML = aList[i].innerHTML;
+                    // append nodes
+                    td1.appendChild(view);
+                    td2.appendChild(run );
+                    td3.appendChild(text);
+                }
+                while (hierarchyTree.firstChild) {
+                    log("Cleaning pre existing hierarchy tree")
+                    hierarchyTree.removeChild(hierarchyTree.firstChild);
+                }
+                hierarchyTree.appendChild(newHierarchyTree);
+            }else{
+                hierarchyTree.innerHTML = "<p style='text-align:center'>Uploaded Files Will Appear Here.</p>"
+            }
+        }else{
+            error("Could not contact Server.")
+            hierarchyTree.innerHTML = "<ERROR> Could not contact Server.";
+        }
+        log("finished getting script listing");
+    }
+    function updatePage(page){
+        var pages=[$("nodes"),$("debug"),$("scripts")];
+        pages.forEach(function(element, index, array){
+            element.style.visibility= "hidden";
+        });
+        $(page).style.visibility= "visible";
+    }
+    //  =====================
+    //  	END Javascript
+    //  =====================
+    </script>
 </head>
 
 <body>
-	<div id="r1">
-		<p>banner</p>
-	</div>
-	<div id="r2">
-		<div id="r2c1">
-		</div>
-		<div id="r2c2">
-			<div id="fileInputButtonDiv">
-				<p id="fileInputButtonP">Drop a script or click here to upload! (Text Only)</p>
-				<input type="file" id="fileInputButton">
-			</div>
-			<div id="contentView" >
-				<p style='text-align:center'>Program Content will appear here. (upload a file and click the eye)</p>
-			</div>
-		</div>
-	</div>
+    <div id="r1">
+        <table id="menuTable">
+            <tr>
+                <td>
+                    <div class="menuButton" style="border-style: none;max-height:10av;"> <!-- logo -->
+                        <!-- <img src="res/logo.png" alt="logo" style="max-width:100%;max-height:100%;"> -->
+                    </div>
+                </td>
+                <td><button class="menuButton" type="button" onclick="updatePage('scripts')">Scripts</button></td>
+                <td><button class="menuButton" type="button" onclick="updatePage('nodes')">Nodes</button></td>
+                <td><button class="menuButton" type="button" onclick="updatePage('debug')">debug</button></td>
+            </tr>
+        </table>
+    </div>
 
-	<script> init();	</script>
+<!--    =====================
+            Node Div
+        ===================== -->
+        <div id="nodes" >
+            <div id="r2_nodes">
+                <div id="r2c1_nodes">
+                    <p style='text-align:center'>Node Listing will appear here.</p>
+                </div>
+                <div id="r2c2_nodes">
+                    <p style='text-align:center'>Node information will appear here.</p>
+                </div>
+            </div>
+        </div>
+<!--    =====================
+            Debug Div
+        ===================== -->
+    <div id="debug" >
+    </div>
+
+<!--    =====================
+            Script Div
+        ===================== -->
+    <div id="scripts" >
+        <div id="r2_scripts">
+            <div id="r2c1_scripts">
+                <p style='text-align:center'>Script Listing will appear here.</p>
+            </div>
+            <div id="r2c2_scripts">
+                <div id="fileInputButtonDiv">
+                    <p id="fileInputButtonP">Drop a script or click here to upload! (Text Only)</p>
+                    <input type="file" id="fileInputButton">
+                </div>
+                <div id="contentView" >
+                    <p style='text-align:center'>Program Content will appear here (upload a file and click the eye)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script> init();	</script>
 </body>
 
 </html>

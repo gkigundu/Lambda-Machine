@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+# Specifications :
+#       1 per cluster
+
 import sys, os
+import re
 import calendar, time
 import threading, socket
 import socketserver, http.server
@@ -52,13 +56,13 @@ class tableRequest():
   port=lu.ports["omega"]
   def __init__(self):
     socketserver.TCPServer.allow_reuse_address = True
-    tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)
-    broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()
-    lu.log(" Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
+    tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)    # HTTP
+    broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()  # serve HTTP in thread
+    lu.log("Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
   def _threadServe(self, httpd):
     httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
-    properPath="/table /lambdaMinionNumber"
+    properPath=str([lu.paths[x] for x in [m.group(0) for l in lu.paths for m in [re.compile("^omega_.*").search(l)] if m]] ) # perfectly conveluded. Gets list of paths from lu.paths based on regex
     def setHeaders(self, code):
         self.send_response(code)
         self.send_header(b'Content-type', 'text/html')
@@ -68,10 +72,10 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         if(self.path == "/"):
             self.setHeaders(200)
             self.wfile.write(str("Please Request a proper path. Try : "+self.properPath).encode("UTF-8"))
-        elif(self.path == "/table"):
+        elif(self.path == lu.paths["omega_Table"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getTable()).encode("UTF-8"))
-        elif(self.path == "/lambdaMinionNumber"):
+        elif(self.path == lu.paths["omega_MinionTable"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
         else:

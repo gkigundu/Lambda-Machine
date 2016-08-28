@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Specifications :
+#       1 per Cluster/Network
+
 import http.server
 import socketserver
 import signal

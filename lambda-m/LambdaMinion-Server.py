@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Specifications :
+#       1/Many per cluster
+
 import sys, os
 import socket, socketserver
 import urllib.request
@@ -34,7 +37,7 @@ class Minion():
     TCPScriptReceival=None
     listenPort=None
     def __init__(self):
-        self.port=lu.ports["lambda-m"]
+        # self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.OmegaAddr=lu.getOmegaAddr(self.addr)
         self.ID = self._getMinionID()
@@ -42,23 +45,26 @@ class Minion():
     def _startScriptReceival(self):
         self.TCPScriptReceival=socketserver.TCPServer((self.addr, 0), MinionTCP_Handler)
         self.listenPort=str(self.TCPScriptReceival.server_address[1])
-        lu.log("Minion " + str(self.ID) +" got listening port : " + self.listenPort)
+        lu.log("Minion " + str(self.ID) +" is waiting for scripts at TCP socket : " + self.addr+":"+self.listenPort)
         self.TCPScriptReceival.serve_forever()
     def _getMinionID(self):
-        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+'/lambdaMinionNumber'
+        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_MinionTable"]
         lu.log("Requesting " + requestURL)
         with urllib.request.urlopen(requestURL) as response:
             minionID = response.read().decode("UTF-8")
             lu.log("Got Minion ID : "+ minionID)
         return minionID
-class MinionTCP_Handler(socketserver.BaseRequestHandler):
+class MinionTCP_Handler(socketserver.BaseRequestHandler):   # handler to deposit script
     def handle(self):
-        self.data = self.request.recv(1024).strip()
-        print("{} wrote:".format(self.client_address[0]))
-        print(self.data)
-        # self.request.sendall(self.data.upper())
-
-
+        print("receiveing")
+        script=""
+        data = self.request.recv(1024)
+        while data:
+            print(data)
+            script += data.decode("UTF-8")
+            data = self.request.recv(1024)
+        print("minion data : " + script)
+        # !!! get script and execute !!!
 
 # this class runs the script it receives and outputs data to database
 # class executer:
@@ -67,15 +73,5 @@ class MinionTCP_Handler(socketserver.BaseRequestHandler):
 #
 #     # send output to database
 #     def databaseInterface:
-#
-# class network:
-#     # receives a script from Lambda-M
-#     def listenForLambda-M:
-#
-#     # requests a connection to Lambda-M, executes "listenForLambda-m" on Lambda-M
-#     def requestLambda-M:
-#
-#     # returns relevant information concerning Lambda-M
-#     def listenForOmega:
 
 main()
