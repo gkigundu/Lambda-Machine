@@ -25,13 +25,14 @@
 ==================
 [] receive scripts
 [] status log
-
+[] http server
 
 ==================
 	Lambda-M
 ==================
 [] receive / distribute scripts to lambda-m
 [] anomaly detection
+[] make program hash the id 
 
 
 ==================

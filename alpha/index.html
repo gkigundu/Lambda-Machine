@@ -70,7 +70,7 @@
     }
     // color selected element
     function colorSelected(hierarchyTree, elem){
-        _("Updating Content View");
+        // _("Updating Content View");
         var rows = hierarchyTree.childNodes[0].getElementsByTagName("tr");
         for (i = 0; i < rows.length; i++) {
             rows[i].style.backgroundColor = "";
@@ -94,15 +94,74 @@
         colorSelected($('r2c1_nodes'), $(name));
         selectedNode=name;
     }
+    // create DOM element and append
+    function createAppend(dom_elem, parent, attributes){
+        var elem  = document.createElement(dom_elem)
+        parent.appendChild(elem);
+        if(attributes){
+            attributes.forEach(function(i){
+                elem.setAttribute(i[0], i[1]);
+            })
+        }
+        return elem
+    }
     // called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
     function run(fileName){
         _("getting content view for running '" + fileName + "'");
         colorSelected($('r2c1_scripts'), $(fileName))
         var conView=$("contentView_script")
         xhrGet("/nodes", function (xhr) {
-            listing=JSON.parse(xhr.response); // got json object of nodes // fix when omega down
-            conView.innerHTML=listing;
+            listing=parseJSON(xhr.response); // got json object of nodes
+            if( ! listing){
+                conView.innerHTML="Connection Broken";
+                return
+            }
+            conView.innerHTML="";
+            createAppend("h1",conView).innerHTML="Run Script";
+            createAppend("br",conView);
+            createAppend("p",conView).innerHTML="Nodes:";
+            var DOM_Table=createAppend("table",conView);
+            var tr=createAppend("tr",DOM_Table);
+            createAppend("td",tr).innerHTML="Execute";
+            createAppend("td",tr).innerHTML="Node Name";
+            createAppend("td",tr).innerHTML="Last Heard (sec)";
+            re=/^[lL]ambda-m.*/
+            var epochTime = (new Date).getTime();
+            listing.forEach(function(elem){
+                if(re.exec(elem.name)){
+                    var tr=createAppend("tr",DOM_Table);
+                    var td1=createAppend("td",tr);
+                    var td2=createAppend("td",tr);
+                    var td3=createAppend("td",tr);
+                    var box=createAppend("input",td1, [["type","checkbox"],["id","check_"+elem.name]]);
+                    var p=createAppend("p",td2);
+                    p.innerHTML=elem.name
+                    var p=createAppend("p",td3);
+                    p.innerHTML=Math.floor(epochTime/1000-elem.time)
+                }
+            });
+            createAppend("br",conView);
+            createAppend("p",conView).innerHTML="Standard In, Out, Error: ";
+            createAppend("p",conView).innerHTML="in";
+            var stdin=createAppend("input",conView, [["type","text"],["id","textfield_stdin"]]);
+            createAppend("br",conView);
+            createAppend("p",conView).innerHTML="out";
+            var stdout=createAppend("input",conView, [["type","text"],["id","textfield_stdout"]]);
+            createAppend("br",conView);
+            createAppend("p",conView).innerHTML="err";
+            var stderr=createAppend("input",conView, [["type","text"],["id","textfield_stderr"]]);
+            createAppend("br",conView);
+            createAppend("br",conView);
+            var DOM_submit=createAppend("button",conView).innerHTML="Submit";
         });
+    }
+    // parse JSON with return value
+    function parseJSON(string){
+        try{
+            return JSON.parse(string)
+        }catch(err){
+            return null
+        }
     }
     // xhr handler
     function xhrGet(loc, func){
@@ -177,7 +236,11 @@
         // _("Getting node listing");
         xhrGet("/nodes", function (xhr) {
             var hierarchyTree = $('r2c1_nodes');
-            listing=JSON.parse(xhr.response); // got json object of nodes // fix when omega down
+            listing=parseJSON(xhr.response); // got json object of nodes
+            if( ! listing){
+                hierarchyTree.innerHTML="Connection Broken";
+                return
+            }
             // _("Nodes Found: ")
             // __(listing)
             var newHierarchyTree = document.createElement("table");
