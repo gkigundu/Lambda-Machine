@@ -7,4 +7,4 @@ push:
 viewChanges:
 	git log -p
 wordCountPy:
-    find -name "*.py" -exec cat {} \; | grep -v "^$" | wc -l
+    find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | wc -l
