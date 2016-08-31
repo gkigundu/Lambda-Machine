@@ -32,7 +32,7 @@
 ==================
 [] receive / distribute scripts to lambda-m
 [] anomaly detection
-[] make program hash the id 
+[] make program hash the id
 
 
 ==================
