@@ -8,3 +8,6 @@ viewChanges:
 	git log -p
 wordCountPy:
     find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | wc -l
+forcePullMaster:
+    git fetch --all
+    git reset --hard origin/master
