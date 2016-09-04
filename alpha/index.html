@@ -27,6 +27,26 @@
         }
         _("Checking API support finished")
     }
+    // xhr Get
+    function xhrGet(loc, func){
+        var xhr = new XMLHttpRequest;
+        xhr.open("GET", loc, true);
+        xhr.onload = function (e) {
+            if(xhr.readyState == 4 && xhr.status == 200){
+                func(xhr);
+            }
+        }
+        xhr.onerror = function (e) {
+            console.error(xhr.statusText);
+        };
+        xhr.send(null);
+    }
+    // xhr Post
+    function xhrPost(loc, data){
+        var xhr = new XMLHttpRequest;
+        xhr.open("POST", loc , false);
+        xhr.send(data); // it seems chrome only supports xhr.send which only sends strings. No binary data.
+    }
     // posts a file to the Python web server
     function postFile(evt){
         _("Posting File ");
@@ -106,8 +126,11 @@
         return elem
     }
     // called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
+    var nodeListingTable=null;
+    var selectedScript=null;
     function run(fileName){
         _("getting content view for running '" + fileName + "'");
+        selectedScript=fileName;
         colorSelected($('r2c1_scripts'), $(fileName))
         var conView=$("contentView_script")
         xhrGet("/nodes", function (xhr) {
@@ -141,19 +164,32 @@
                 }
             });
             createAppend("br",conView);
-            createAppend("p",conView).innerHTML="Standard In, Out, Error: ";
-            createAppend("p",conView).innerHTML="in";
-            var stdin=createAppend("input",conView, [["type","text"],["id","textfield_stdin"]]);
-            createAppend("br",conView);
-            createAppend("p",conView).innerHTML="out";
-            var stdout=createAppend("input",conView, [["type","text"],["id","textfield_stdout"]]);
-            createAppend("br",conView);
-            createAppend("p",conView).innerHTML="err";
-            var stderr=createAppend("input",conView, [["type","text"],["id","textfield_stderr"]]);
-            createAppend("br",conView);
-            createAppend("br",conView);
-            var DOM_submit=createAppend("button",conView).innerHTML="Submit";
+            var DOM_submit=createAppend("button",conView, [["onclick", "submitJob()"]]).innerHTML="Submit Job";
+            nodeListingTable=DOM_Table;
         });
+    }
+    // jobs for minions
+    function submitJob(){
+        _("Prepairing to submit job.");
+        message_JSON={}
+        message_JSON.nodes=[];
+        var els=Array.prototype.slice.call(nodeListingTable.getElementsByTagName("tr")).slice(1);
+        els.forEach(function( elem){
+            if(elem.getElementsByTagName("td")[0].getElementsByTagName("input")[0].checked){
+                message_JSON.nodes.push(elem.getElementsByTagName("td")[1].getElementsByTagName("p")[0].innerHTML);
+            }
+        });
+        message_JSON.script=[];
+        if(message_JSON.nodes.length > 0){
+            xhrGet("/codeScrolls/" + selectedScript, function(xhr){
+                message_JSON.script=xhr.response;
+                _("Submitting.");
+                xhrPost("/submitToMaster",message_JSON);
+            });
+        }
+        else{
+            _("No nodes specified.");
+        }
     }
     // parse JSON with return value
     function parseJSON(string){
@@ -162,20 +198,6 @@
         }catch(err){
             return null
         }
-    }
-    // xhr handler
-    function xhrGet(loc, func){
-        var xhr = new XMLHttpRequest;
-        xhr.open("GET", loc, true);
-        xhr.onload = function (e) {
-            if(xhr.readyState == 4 && xhr.status == 200){
-                func(xhr);
-            }
-        }
-        xhr.onerror = function (e) {
-            console.error(xhr.statusText);
-        };
-        xhr.send(null);
     }
     // updates the heirarchy view with the scripts found in the python server's codescrolls directory
     function getScriptListing(){
@@ -295,6 +317,7 @@
                 colorSelected($('r2c1_nodes'), $(selectedNode));
             }
             _("Got new node listing");
+            _(listing)
         });
     }
     // change view

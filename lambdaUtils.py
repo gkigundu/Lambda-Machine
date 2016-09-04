@@ -35,7 +35,9 @@ paths["omega_MinionTable"]      = "/lambdaMinionNumber" # GET
 paths["master_ClusterStat"]     = "/clusterStatus"      # GET & POST
 paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET
-paths["omega_TableJSON"]             = "/nodesJSON"          # GET
+paths["alpha_postScript"]       = "/submitToMaster"     # GET
+paths["alpha_scripts"]          = "codeScrolls"        # GET
+paths["omega_TableJSON"]        = "/nodesJSON"          # GET
 
 # ==========================
 #   Helper Functions

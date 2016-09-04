@@ -103,15 +103,26 @@ class handler(http.server.BaseHTTPRequestHandler):
     # POST
     def do_POST(self):
         lu.log("Post Request - " + self.path)
-        fp=self.rfile
-        filePath=re.sub("^/",os.getcwd()+"/",self.path)
-        filePath=re.sub("%20"," ",filePath)
-        length = int(self.headers.get_all('content-length')[0])
-        self.setHeaders(200)
-        if(length > 0):
-            f = open(filePath, 'wb')
-            f.write(fp.read(length))
-            f.close()
+        pathroot=self.path.split("/")
+        while "" in pathroot:
+            pathroot.remove("")
+        if(pathroot[0] == lu.paths["alpha_scripts"]): ## file upload is broken
+            lu.log("Uploading Script - " + self.path)
+            fp=self.rfile
+            filePath=re.sub("^/",os.getcwd()+"/",self.path)
+            filePath=re.sub("%20"," ",filePath)
+            length = int(self.headers.get_all('content-length')[0])
+            self.setHeaders(200)
+            if(length > 0):
+                f = open(filePath, 'wb')
+                f.write(fp.read(length))
+                f.close()
+        elif(self.path == lu.paths["alpha_postScript"]):
+            self.setHeaders(200)
+            print("cata") ## from here relay message to lambda master
+        else:
+            lu.log("Could not post " + self.path)
+
     # redirects a client using javascript
     def redirect(self, dest):
         html1='''
