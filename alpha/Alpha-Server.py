@@ -7,6 +7,7 @@ import http.server
 import socketserver
 import signal
 import urllib.request
+import ast
 
 import sys, os, re
 import cgi
@@ -105,7 +106,7 @@ class handler(http.server.BaseHTTPRequestHandler):
         pathroot=self.path.split("/")
         while "" in pathroot:
             pathroot.remove("")
-        if(pathroot[0] == lu.paths["alpha_scripts"]): ## file upload is broken
+        if(pathroot[0] == lu.paths["alpha_scripts"]): ## TEST : file upload 
             lu.log("Uploading Script - " + self.path)
             fp=self.rfile
             filePath=re.sub("^/",os.getcwd()+"/",self.path)
@@ -117,8 +118,31 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.write(fp.read(length))
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]):
+            msg=None
+            requestURL='http://'+str(OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_Table"]
+            with urllib.request.urlopen(requestURL) as response:
+               msg = response.read().decode("UTF-8")
+            try:
+                msg=ast.literal_eval(msg)
+            except:
+                lu.error("Could not parse routing table")
+                return 1
+            masterAddr=None
+            for entity in msg:
+                if(entity[1] == "Lambda-M"):
+                    masterAddr=entity[0]    
+            if(not masterAddr):
+                lu.log("Could not find master server to send script.")
+                return 1
+            requestURL='http://'+str(masterAddr)+':'+str(lu.ports["lambda-M"])+lu.paths["master_postScript"]
+         
+            # send to request
+            length = int(self.headers.get_all('content-length')[0])
             self.setHeaders(200)
-            print("cata") ## from here relay message to lambda master
+            if(length > 0):
+                urllib.request.urlopen(requestURL, self.rfile.read(length))
+            else:
+                lu.log("Nothing to send to master")
         else:
             lu.log("Could not post " + self.path)
 

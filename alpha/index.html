@@ -183,8 +183,8 @@
         if(message_JSON.nodes.length > 0){
             xhrGet("/codeScrolls/" + selectedScript, function(xhr){
                 message_JSON.script=xhr.response;
-                _("Submitting.");
-                xhrPost("/submitToMaster",message_JSON);
+                _("Submitting message.");
+                xhrPost("/submitToMaster",JSON.stringify(message_JSON));
             });
         }
         else{

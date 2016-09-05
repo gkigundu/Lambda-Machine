@@ -31,7 +31,7 @@ ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subn
 # ==========================
 paths = {}
 paths["omega_Table"]            = "/table"              # GET
-paths["omega_MinionTable"]      = "/lambdaMinionNumber" # GET
+paths["omega_MinionTable"]      = "/lambdaMinionNumber" # GET # change this to miion mumber
 paths["master_ClusterStat"]     = "/clusterStatus"      # GET & POST
 paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET

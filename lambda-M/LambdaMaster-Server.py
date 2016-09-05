@@ -65,9 +65,9 @@ class scriptPostHandler(http.server.BaseHTTPRequestHandler):
             lu.log("Got Payload : \n" + data )
             # !!! Parse input into JSON !!!
             # !!! send to minion based off of json node info !!!
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.sendto(data.encode("UTF-8"), ("192.168.1.145" , 53063)) # the minion server
-            sock.close()
+            #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #sock.sendto(data.encode("UTF-8"), ("192.168.1.145" , 53063)) # the minion server
+            #sock.close()
         else:
             self.setHeaders(500)
 main()
