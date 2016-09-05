@@ -25,7 +25,6 @@ os.chdir(filePath)
 # ==========================
 port=lu.ports["alpha"]
 addr=lu.getAddr()
-codeDir = "codeScrolls"
 
 # ==========================
 #   Parse Args
@@ -40,8 +39,8 @@ for i in range(len(args)):
 # ==========================
 #   Init Setup
 # ==========================
-if not os.path.exists(codeDir):
-    os.makedirs(codeDir)
+if not os.path.exists(lu.paths["alpha_scripts"]):
+    os.makedirs(lu.paths["alpha_scripts"])
 
 # ==========================
 #   Main user front end server
