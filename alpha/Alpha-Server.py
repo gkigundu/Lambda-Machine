@@ -7,7 +7,6 @@ import http.server
 import socketserver
 import signal
 import urllib.request
-import ast
 
 import sys, os, re
 import cgi

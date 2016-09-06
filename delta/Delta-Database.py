@@ -3,6 +3,8 @@
 # Specifications :
 #       1/Many per cluster
 
+# TO DO : auto install java. Maybe docker?
+
 import urllib.request
 import sys, os, zipfile
 import subprocess

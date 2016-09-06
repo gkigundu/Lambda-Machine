@@ -166,5 +166,5 @@ def main():
             table.updateEntry(info)
         else:
             time.sleep(1)
-            print(table.getTable())
+            # print(table.getTable())
 main()
