@@ -53,15 +53,15 @@ class networkTable():
 # ==========================
 # implements a network handler for handling network table requests. returns a python list with http headers. TCP based
 class tableRequest():
-  addr=ADDR
-  port=lu.ports["omega"]
-  def __init__(self):
-    socketserver.TCPServer.allow_reuse_address = True
-    tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)    # HTTP
-    broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()  # serve HTTP in thread
-    lu.log("Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
-  def _threadServe(self, httpd):
-    httpd.serve_forever()
+    addr=ADDR
+    port=lu.ports["omega"]
+    def __init__(self):
+        socketserver.TCPServer.allow_reuse_address = True
+        tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)    # HTTP
+        broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()  # serve HTTP in thread
+        lu.log("Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
+    def _threadServe(self, httpd):
+        httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
     properPath=str([lu.paths[x] for x in [m.group(0) for l in lu.paths for m in [re.compile("^omega_.*").search(l)] if m]] ) # perfectly conveluded. Gets list of paths from lu.paths based on regex
     def setHeaders(self, code):
@@ -111,17 +111,17 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
     def _broadcast(self, port):
           # continually sends out ping messages with the clients ip addr and name. UDP
         msg=str(self.addr)+" "+str(self.name)
-        lu.log("Broadcasting on port : " + str(port) )
+        lu.log("Broadcasting omega address on : " + str(lu.ports["OmegaBroadcast"]) )
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        # POTENTIAL MAJOR BUG : Test that this while loop does not overflow network Bandwidth 
         while self.alive:
-            for addr in self.broadcastAddr:
-                sock.sendto(msg.encode("UTF-8"), (str(addr), port))
-            time.sleep(self.sleepTime)
+            #lu.log("Broadcasting omega address on : " + str(lu.ports["OmegaBroadcast"]) )
+            sock.sendto(msg.encode("UTF-8"), (lu.getBroadcast(), lu.ports["OmegaBroadcast"]))
+            time.sleep(1)
     def _listen(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((self.addr, lu.ports["OmegaListen"])) # UDP
+        lu.log("Binded and listening on " + str((self.addr, lu.ports["OmegaListen"])))
         while self.alive:
             data, addr = sock.recvfrom(1024)
             time.sleep(.1)

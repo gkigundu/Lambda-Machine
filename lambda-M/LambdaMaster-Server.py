@@ -8,6 +8,7 @@ import sys, os
 import re
 import http.server
 import socketserver
+import json
 import threading
 
 # ==========================
@@ -64,7 +65,11 @@ class scriptPostHandler(http.server.BaseHTTPRequestHandler):
             self.setHeaders(200)
             length = self.headers['content-length']
             data = self.rfile.read(int(length)).decode("UTF-8")
-            lu.log("Got Payload : \n" + data )
+            data = json.loads(data)
+            nodes = data["nodes"]
+            script = data["script"]
+            for i in nodes:
+                print(i)
             # !!! Parse input into JSON !!!
             # !!! send to minion based off of json node info !!!
             #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

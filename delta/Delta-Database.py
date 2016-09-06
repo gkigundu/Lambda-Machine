@@ -55,11 +55,11 @@ def main():
         command = "bash " + databaseDir + "/bin/elasticsearch --network.host " + addr
         proc = lu.subProc(command)
         while(proc.isAlive() != 0 or not proc.queuesEmpty()):
-          out=proc.getOutput()
-          if out[0]:
-            lu.log(out[0])
-          if out[1]:
-            lu.error(out[1])
+            out=proc.getOutput()
+            if out[0]:
+                lu.log(out[0])
+            if out[1]:
+                lu.error(out[1])
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:
