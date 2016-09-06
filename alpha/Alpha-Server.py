@@ -118,22 +118,7 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.write(fp.read(length))
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]):
-            msg=None
-            requestURL='http://'+str(OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_Table"]
-            with urllib.request.urlopen(requestURL) as response:
-                msg = response.read().decode("UTF-8")
-            try:
-                msg=ast.literal_eval(msg)
-            except:
-                lu.error("Could not parse routing table")
-                return 1
-            masterAddr=None
-            for entity in msg:
-                if(entity[1] == "Lambda-M"):
-                    masterAddr=entity[0]
-            if(not masterAddr):
-                lu.log("Could not find master server to send script.")
-                return 1
+            masterAddr = lu.getAddrOf("Lambda-M")
             requestURL='http://'+str(masterAddr)+':'+str(lu.ports["lambda-M"])+lu.paths["master_postScript"]
 
             # send to request
