@@ -13,7 +13,8 @@ forcePullMaster:
     git reset --hard origin/master
 killPython:
     sudo kill $(ps -ef | grep "alpha\|omega\|lambda\|delta" | grep python -i | grep -v "grep" | awk '{print $2}')
-startAll:
+startAll: 
+	# for developers
     job -y killPython || echo -n ""
     ./alpha/Alpha-Server.py &
     ./omega/Omega-Server.py &
@@ -26,3 +27,8 @@ startAll:
     ./lambda-m/LambdaMinion-Server.py &
 mpad:
     mousepad ./alpha/Alpha-Server.py ./lambdaUtils.py  ./omega/Omega-Server.py ./lambda-M/LambdaMaster-Server.py     ./delta/Delta-Database.py  ./lambda-m/LambdaMinion-Server.py &
+mergeWithMaster:
+	git checkout master
+	git pull origin master
+	git merge dev-1
+	git push origin master
