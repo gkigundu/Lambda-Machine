@@ -8,6 +8,7 @@ import sys, os
 import re
 import http.server
 import socketserver
+import socket
 import json
 import threading
 
@@ -64,17 +65,18 @@ class scriptPostHandler(http.server.BaseHTTPRequestHandler):
         if(self.path == lu.paths["master_postScript"]):
             self.setHeaders(200)
             length = self.headers['content-length']
+            # parse data to json
             data = self.rfile.read(int(length)).decode("UTF-8")
             data = json.loads(data)
             nodes = data["nodes"]
-            script = data["script"]
+            script = str(data["script"])
+            # send to specified minion
             for i in nodes:
-                print(i)
-            # !!! Parse input into JSON !!!
-            # !!! send to minion based off of json node info !!!
-            #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #sock.sendto(data.encode("UTF-8"), ("192.168.1.145" , 53063)) # the minion server
-            #sock.close()
+                dest = lu.getAddrOf(i)
+                lu.log("Sending script to " + i + ":" + str(dest))
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.sendto(script.encode("UTF-8"), dest)  # the minion server
+                sock.close()
         else:
             self.setHeaders(500)
 main()

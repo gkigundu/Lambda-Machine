@@ -3,9 +3,11 @@ import socket
 import ipaddress
 import threading, subprocess
 import queue
+import urllib.request
 import time
 import inspect
 import re
+import ast
 
 # ==========================
 #   Global Variables
@@ -70,31 +72,6 @@ def error(string, *e):
     sys.stderr.flush()
     sys.exit(1)
 addr = None
-def getAddr():
-    global addr
-    global subNet
-    if addr:
-        pass
-    # returns LAN address
-    elif(subNet == "127.0.0.1/32"):
-        addr="127.0.0.1"
-    # get dynamic addr by connecting to internet
-    else:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            s.connect(("8.8.8.8", 80))
-            log("Connect to internet. Using address : " + s.getsockname()[0])
-            return s.getsockname()[0]
-        except OSError:
-            log("Could not connect to internet. Using localhost 127.0.0.1")
-            subNet="127.0.0.1/32"
-            addr="127.0.0.1"
-        except:
-            error("Could not get address.")
-    return addr
-def getBroadcast():
-    return str(ipaddress.ip_network(subNet).broadcast_address)
-                #return ipaddress.ip_network(subNet)
 # ==========================
 #   Sub Process
 # ==========================
@@ -161,6 +138,31 @@ class subProc():
 #  Node Discovery
 # ==========================
 omegaAddr=None
+def getAddr():
+    global addr
+    global subNet
+    if addr:
+        pass
+    # returns LAN address
+    elif(subNet == "127.0.0.1/32"):
+        addr="127.0.0.1"
+    # get dynamic addr by connecting to internet
+    else:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            log("Connect to internet. Using address : " + s.getsockname()[0])
+            return s.getsockname()[0]
+        except OSError:
+            log("Could not connect to internet. Using localhost 127.0.0.1")
+            subNet="127.0.0.1/32"
+            addr="127.0.0.1"
+        except:
+            error("Could not get address.")
+    return addr
+def getBroadcast():
+    return str(ipaddress.ip_network(subNet).broadcast_address)
+                #return ipaddress.ip_network(subNet)
 # get the address of the entity specified
 def getAddrOf(entityStr):
     msg=None
@@ -170,12 +172,15 @@ def getAddrOf(entityStr):
     try:
         msg=ast.literal_eval(msg)
     except:
-        lu.error("Could not parse routing table")
+        error("Could not parse routing table")
         return 1
     foundAddr=None
     for entity in msg:
         if(entity[1] == entityStr):
-            foundAddr=entity[0]
+            try:
+                foundAddr=(entity[0], int(entity[3])) # if lambda-m port
+            except IndexError:
+                foundAddr=entity[0]
     return foundAddr
 def getOmegaAddr(*addr):
     global omegaAddr
