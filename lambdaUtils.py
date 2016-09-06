@@ -10,7 +10,9 @@ import re
 # ==========================
 #   Global Variables
 # ==========================
-subNet="192.168.1.0/24"
+#subNet="192.168.1.0/24"
+subNet="127.0.0.1/32"
+
 
 # ==========================
 #   Static Ports
@@ -65,7 +67,9 @@ def error(string, *e):
     sys.stderr.flush()
     sys.exit(1)
 def getAddr():
-    # returns LAN address
+  # returns LAN address
+  if(subNet == "127.0.0.1/32"):
+    return "127.0.0.1"
   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   try:
     s.connect(("8.8.8.8", 80))
@@ -145,6 +149,7 @@ class subProc():
 # ==========================
 #  Node Discovery
 # ==========================
+\
 def getOmegaAddr(addr):
     omegaBroadcastReceived = False
     log("Getting Omega Address.")

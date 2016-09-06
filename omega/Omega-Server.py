@@ -114,10 +114,11 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
         lu.log("Broadcasting on port : " + str(port) )
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        # POTENTIAL MAJOR BUG : Test that this while loop does not overflow network Bandwidth 
         while self.alive:
             for addr in self.broadcastAddr:
                 sock.sendto(msg.encode("UTF-8"), (str(addr), port))
-        sleep(self.sleepTime)
+            time.sleep(self.sleepTime)
     def _listen(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((self.addr, lu.ports["OmegaListen"])) # UDP

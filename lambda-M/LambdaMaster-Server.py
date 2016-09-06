@@ -23,8 +23,10 @@ os.chdir(filePath)
 #   Main function
 # ==========================
 def main():
-    master = Master()
     broadcastListener = lu.nodeDiscovery("Lambda-M")
+    lu.log("Starting Master.")
+    master = Master()
+    lu.log("Master initialized.")
 
 # ==========================
 #   Master
