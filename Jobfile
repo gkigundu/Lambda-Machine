@@ -25,4 +25,4 @@ startAll:
     ./lambda-m/LambdaMinion-Server.py &
     ./lambda-m/LambdaMinion-Server.py &
 mpad:
-    mousepad ./alpha/Alpha-Server.py ./lambdaUtils.py  ./omega/Omega-Server.py ./lambda-M/LambdaMaster-Server.py     ./delta/Delta-Database.py  ./lambda-m/LambdaMinion-Server.py
+    mousepad ./alpha/Alpha-Server.py ./lambdaUtils.py  ./omega/Omega-Server.py ./lambda-M/LambdaMaster-Server.py     ./delta/Delta-Database.py  ./lambda-m/LambdaMinion-Server.py &
