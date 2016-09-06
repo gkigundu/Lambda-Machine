@@ -161,6 +161,7 @@ class subProc():
 #  Node Discovery
 # ==========================
 omegaAddr=None
+<<<<<<< HEAD
 def getOmegaAddr(*addr):
     global omegaAddr
     if omegaAddr:
@@ -170,6 +171,12 @@ def getOmegaAddr(*addr):
     else:
         addr = addr[0] 
     
+=======
+def getOmegaAddr(addr):
+	global omegaAddr
+	if omegaAddr:
+	    return omegaAddr
+>>>>>>> 08d223971ff7744b34b0bf677b833eacd0acf3ea
     omegaBroadcastReceived = False
     log("Getting Omega Address.")
     while not omegaBroadcastReceived:
