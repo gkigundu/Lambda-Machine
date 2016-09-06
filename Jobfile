@@ -16,10 +16,10 @@ killPython:
 startAll: 
 	# for developers
     job -y killPython || echo -n ""
-    ./alpha/Alpha-Server.py &
-    ./omega/Omega-Server.py &
-    ./lambda-M/LambdaMaster-Server.py &
-    ./delta/Delta-Database.py &
+    xterm -e ./alpha/Alpha-Server.py &
+    xterm -e ./omega/Omega-Server.py &
+    xterm -e ./lambda-M/LambdaMaster-Server.py &
+    xterm -e ./delta/Delta-Database.py &
     # many minions
     ./lambda-m/LambdaMinion-Server.py &
     ./lambda-m/LambdaMinion-Server.py &
