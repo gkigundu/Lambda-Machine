@@ -36,15 +36,17 @@ class networkTable():
         # returns nex available minion number
         self.minionNumber=self.minionNumber+1
         return self.minionNumber
-    def updateEntry(self, netList):
-        for i in range(0, len(self.networkTable)):
-            if(self.networkTable[i][1] == netList[1]): # name
-                self.networkTable[i][0] = netList[0]   # ip
-                self.networkTable[i][2] = netList[2]   # time
-                updated = 1
+    def updateEntry(self, entry):
+        try :
+            entry = json.loads(entry)
+        except :
+            return 1
+        for i in self.networkTable:
+            if(i["name"] == entry["name"]):
+                i = entry
                 return
-        self.networkTable.append(netList) # append to tabe if entity does not exist
-        return
+        self.networkTable.append(entry) # append to tabe if entity does not exist
+        return 0
     def getTable(self):
         return self.networkTable
 
@@ -72,14 +74,7 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         lu.log("Handling the Request to : " + self.path)
         if(self.path == lu.paths["omega_TableJSON"]):
             self.setHeaders(200)
-            tableJSON=[]
-            for i in table.getTable():
-                try:
-                    tableJSON.append(dict({"name":i[1],"addr":i[0],"time":i[2],"port":i[3]})) # make this a better test
-                except:
-                    tableJSON.append(dict({"name":i[1],"addr":i[0],"time":i[2]}))
-
-            self.wfile.write(str(json.dumps(tableJSON)).encode("UTF-8"))
+            self.wfile.write(str(table.getTable()).encode("UTF-8"))
         elif(self.path == lu.paths["omega_MinionTable"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
@@ -140,24 +135,12 @@ def main():
     # get messages over UDP to update networkTable
     broadcastListener = OmegaNodeDiscovery("omega")
     tableRequestObj = tableRequest()
-    table.updateEntry( [broadcastListener.addr, "omega", int(calendar.timegm(time.gmtime()))] )
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["OmegaListen"]))
-    while broadcastListener.alive :
-        table.updateEntry([broadcastListener.addr, "omega", int(calendar.timegm(time.gmtime()))])
+    while broadcastListener.alive:
         msg = broadcastListener.getMsg()
         if msg:
-            info         =msg.split(" ")
-            ipAddr       =info[0]
-            name         =info[1]
-            epochTime    =int(calendar.timegm(time.gmtime()))
-            port         =None
-            try:    port =info[2]
-            except: pass
-            info=[ipAddr, name, epochTime]
-            if(port):
-                info.append(port)
-            table.updateEntry(info)
+            table.updateEntry(msg)
         else:
             time.sleep(1)
             print(table.getTable())

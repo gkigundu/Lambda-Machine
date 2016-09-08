@@ -26,17 +26,6 @@ os.chdir(filePath)
 #   Global Defaults
 # ==========================
 port=lu.ports["alpha"]
-addr=lu.getAddr()
-
-# ==========================
-#   Parse Args
-# ==========================
-args=sys.argv[1:]
-for i in range(len(args)):
-    if (args[i] == "-p"):
-        port = int(args[i+1])
-    if (args[i] == "-a"):
-        addr = str(args[i+1])
 
 # ==========================
 #   Init Setup
@@ -47,8 +36,6 @@ if not os.path.exists(lu.paths["alpha_scripts"]):
 # ==========================
 #   Main user front end server
 # ==========================
-addr=lu.getAddr()
-OmegaAddr=lu.getOmegaAddr(addr)
 class handler(http.server.BaseHTTPRequestHandler):
     # set http headers
     def setHeaders(self, code):
@@ -72,13 +59,16 @@ class handler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
         if (self.path == lu.paths["alpha_nodeListing"]): # node
-            self.setHeaders(200)
-            requestURL='http://'+str(OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_TableJSON"]
+            requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.ports["omega"])+lu.paths["omega_TableJSON"]
             lu.log("Requesting " + requestURL)
             msg=None
-            with urllib.request.urlopen(requestURL) as response:
-                msg = response.read().decode("UTF-8")
-            self.wfile.write(msg.encode("UTF-8"))
+            try:
+                with urllib.request.urlopen(requestURL) as response:
+                    self.setHeaders(200)
+                    msg = response.read().decode("UTF-8")
+                    self.wfile.write(msg.encode("UTF-8"))
+            except:
+                lu.log("Could not get network table from Omega.")
         elif os.path.isfile(filePath):
             self.setHeaders(200)
             self.writeDataToHandler(filePath)
@@ -129,14 +119,14 @@ class handler(http.server.BaseHTTPRequestHandler):
                 # self.setHeaders(200)
                 data["script"]=lu.paths["alpha_scripts"] + "/" + data["script"]
                 data["Hash"] = hashlib.md5(fileLoc).hexdigest()
-                f = open(, "rb")
-                try:
-                    byte = f.read(1)
-                    while byte != "":
-                        # Do stuff with byte.
-                        byte = f.read(1)
-                finally:
-                    f.close()
+                # f = open(, "rb")
+                # try:
+                #     byte = f.read(1)
+                #     while byte != "":
+                #         # Do stuff with byte.
+                #         byte = f.read(1)
+                # finally:
+                #     f.close()
                 print("cat")
             else:
                 lu.log("Nothing to send to master")
@@ -170,9 +160,9 @@ class handler(http.server.BaseHTTPRequestHandler):
 # ==========================
 try:
     socketserver.TCPServer.allow_reuse_address = True
-    httpd = socketserver.TCPServer((addr, port), handler)
+    httpd = socketserver.TCPServer((lu.getAddr(), port), handler)
     broadcastListener = lu.nodeDiscovery("alpha")
-    lu.log(" Serving @ " + str(addr) + ":" + str(port))
+    lu.log(" Serving @ " + str(lu.getAddr()) + ":" + str(port))
     httpd.serve_forever()
 except OSError:
     lu.error("Port in use - " + str(port))
