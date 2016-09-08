@@ -7,6 +7,7 @@ import urllib.request
 import time
 import inspect
 import re
+import json
 import ast
 
 # ==========================
@@ -176,20 +177,17 @@ def getAddrOf(entityStr):
         return 1
     foundAddr=None
     for entity in msg:
-        if(entity[1] == entityStr):
+        if(entity[1].name == entityStr):
             try:
                 foundAddr=(entity[0], int(entity[3])) # if lambda-m port
             except IndexError:
                 foundAddr=entity[0]
     return foundAddr
-def getOmegaAddr(*addr):
+def getOmegaAddr():
     global omegaAddr
     if omegaAddr:
         return omegaAddr
-    if len(addr) > 0:
-        addr = getAddr()
-    else:
-        addr = addr[0]
+    addr = getAddr()
     omegaBroadcastReceived = False
     log("Getting Omega Address.")
     while not omegaBroadcastReceived:
@@ -220,25 +218,27 @@ class nodeDiscovery():
     alive=True
     queueSize=20
     UDPtimout=500
-    omegaAddr=None
-    port=None
-    addr=getAddr()
+    jsonInfo=None
     broadcastAddr=getBroadcast()
     def __init__(self, name, *port):
         # initializes a multicast UDP socket and broadcasts the nodes ip address to the subnet.
         #   It also listens for incoming messages
-        self.name=name
-        self.omegaAddr=getOmegaAddr(self.addr)
-        try:    self.port=port[0]
-        except: pass
+        # ports is a touple : (str(portName), int(portNum))
+        for i in port:
+            jsonInfo[i[0]]+=i[1]
+        self.jsonInfo={}
+        self.jsonInfo["name"] = name
+        self.jsonInfo["addr"]=getAddr()
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
-    def _informOmega(self, jsonInfo):
-                    # continually sends out ping messages with the clients ip addr and name. UDP
+    def _informOmega(self):
+        # continually sends out ping messages with the clients ip addr and name. UDP
         while self.alive:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.sendto(jsonInfo.encode("UTF-8"), (self.omegaAddr, ports["OmegaListen"]))
+            jsonDump=json.dumps(self.jsonInfo)
+            print(jsonDump)
+            sock.sendto(jsonDump.encode("UTF-8"), (getOmegaAddr(), ports["OmegaListen"]))
             time.sleep(self.sleepTime)
     def kill(self):
             # destroys the nodeDiscovery threads
