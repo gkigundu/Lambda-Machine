@@ -1,3 +1,5 @@
+[] make all  ports dynamic
+
 ==================
 	Omega
 ==================
