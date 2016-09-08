@@ -7,6 +7,8 @@ import http.server
 import socketserver
 import signal
 import urllib.request
+import json
+import hashlib
 
 import sys, os, re
 import cgi
@@ -116,15 +118,26 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f = open(filePath, 'wb')
                 f.write(fp.read(length))
                 f.close()
-        elif(self.path == lu.paths["alpha_postScript"]):
+        elif(self.path == lu.paths["alpha_postScript"]): # post to master
             masterAddr = lu.getAddrOf("Lambda-M")
-            requestURL='http://'+str(masterAddr)+':'+str(lu.ports["lambda-M"])+lu.paths["master_postScript"]
-
-            # send to request
+            # requestURL='http://'+str(masterAddr)+':'+str(lu.ports["lambda-M"])+lu.paths["master_postScript"]
+            # parse JSON request
             length = int(self.headers.get_all('content-length')[0])
-            self.setHeaders(200)
             if(length > 0):
-                urllib.request.urlopen(requestURL, self.rfile.read(length))
+                # urllib.request.urlopen(requestURL, self.rfile.read(length))
+                data = json.loads(self.rfile.read(length).decode("UTF-8"))
+                # self.setHeaders(200)
+                data["script"]=lu.paths["alpha_scripts"] + "/" + data["script"]
+                data["Hash"] = hashlib.md5(fileLoc).hexdigest()
+                f = open(, "rb")
+                try:
+                    byte = f.read(1)
+                    while byte != "":
+                        # Do stuff with byte.
+                        byte = f.read(1)
+                finally:
+                    f.close()
+                print("cat")
             else:
                 lu.log("Nothing to send to master")
         else:

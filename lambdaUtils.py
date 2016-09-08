@@ -170,7 +170,7 @@ def getAddrOf(entityStr):
     with urllib.request.urlopen(requestURL) as response:
         msg = response.read().decode("UTF-8")
     try:
-        msg=ast.literal_eval(msg)
+        msg = json.loads(msg)
     except:
         error("Could not parse routing table")
         return 1
@@ -233,15 +233,12 @@ class nodeDiscovery():
         except: pass
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
-    def _informOmega(self):
+    def _informOmega(self, jsonInfo):
                     # continually sends out ping messages with the clients ip addr and name. UDP
-        msg=str(self.addr)+" "+str(self.name)
-        if(self.port):
-            msg+=" " + self.port
         while self.alive:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.sendto(msg.encode("UTF-8"), (self.omegaAddr, ports["OmegaListen"]))
+            sock.sendto(jsonInfo.encode("UTF-8"), (self.omegaAddr, ports["OmegaListen"]))
             time.sleep(self.sleepTime)
     def kill(self):
             # destroys the nodeDiscovery threads

@@ -70,13 +70,7 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
     def do_GET(self): # check if contained to directory
         lu.log("Handling the Request to : " + self.path)
-        if(self.path == "/"):
-            self.setHeaders(200)
-            self.wfile.write(str("Please Request a proper path. Try : "+self.properPath).encode("UTF-8"))
-        elif(self.path == lu.paths["omega_Table"]):
-            self.setHeaders(200)
-            self.wfile.write(str(table.getTable()).encode("UTF-8"))
-        elif(self.path == lu.paths["omega_TableJSON"]):
+        if(self.path == lu.paths["omega_TableJSON"]):
             self.setHeaders(200)
             tableJSON=[]
             for i in table.getTable():
@@ -166,5 +160,5 @@ def main():
             table.updateEntry(info)
         else:
             time.sleep(1)
-            # print(table.getTable())
+            print(table.getTable())
 main()

@@ -75,6 +75,7 @@ class scriptPostHandler(http.server.BaseHTTPRequestHandler):
                 dest = lu.getAddrOf(i)
                 lu.log("Sending script to " + i + ":" + str(dest))
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.connect(dest)
                 sock.sendto(script.encode("UTF-8"), dest)  # the minion server
                 sock.close()
         else:

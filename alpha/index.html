@@ -180,12 +180,9 @@
             }
         });
         message_JSON.script=[];
+        message_JSON.script=selectedScript;
         if(message_JSON.nodes.length > 0){
-            xhrGet("/codeScrolls/" + selectedScript, function(xhr){
-                message_JSON.script=xhr.response;
-                _("Submitting message.");
-                xhrPost("/submitToMaster",JSON.stringify(message_JSON));
-            });
+            xhrPost("/submitToMaster",JSON.stringify(message_JSON));
         }
         else{
             _("No nodes specified.");
