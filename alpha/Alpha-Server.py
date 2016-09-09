@@ -54,7 +54,7 @@ class handler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
         if (self.path == lu.paths["alpha_nodeListing"]): # node
-            requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.ports["omega"])+lu.paths["omega_TableJSON"]
+            requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.getPort("omega"))+lu.paths["omega_TableJSON"]
             lu.log("Requesting " + requestURL)
             msg=None
             try:
