@@ -21,7 +21,7 @@ subNet="127.0.0.1/32"
 # ==========================a
 
 _ports = {}
-_ports["alpha"]            = None # HTTP   # HTTP Website frontend
+_ports["alpha"]            = 26000 # HTTP   # HTTP Website frontend
 _ports["omega_tableReq"]      = None # HTTP   # Network Table and Minion ID requests
 _ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
 _ports["lambda-Master"]   = None # HTTP   # push scripts for distribution
@@ -226,7 +226,6 @@ def getOmegaAddr():
         except OSError :
             sock.close()
             time.sleep(.1)
-            log("Socket in use. THIS MAY BE A BUG. Retrying")
     sock.close()
     omegaAddr=data.decode("UTF-8").split(" ")[0]
     log("Got Omega Address : " + omegaAddr)
@@ -246,9 +245,9 @@ class nodeDiscovery():
         # ports is a touple : (str(portName), int(portNum))
         self.jsonInfo={}
         for i in ports:
-            self.jsonInfo[i[0].lower()]+=i[1]
-        self.jsonInfo["name"]=self.name
-        self.jsonInfo["addr"]=self.addr
+            self.jsonInfo[i[0].lower()]=i[1]
+        self.jsonInfo["name"]=name
+        self.jsonInfo["addr"]=getAddr()
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
     def _informOmega(self):
@@ -257,7 +256,7 @@ class nodeDiscovery():
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         while self.alive:
             jsonDump=json.dumps(self.jsonInfo)
-            sock.sendto(jsonDump.encode("UTF-8"), (getOmegaAddr(), ports("OmegaListen")))
+            sock.sendto(jsonDump.encode("UTF-8"), (getOmegaAddr(), getPort("OmegaListen")))
             time.sleep(self.sleepTime)
     def kill(self):
             # destroys the nodeDiscovery threads

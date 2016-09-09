@@ -21,7 +21,7 @@ os.chdir(filePath)
 # ==========================
 #   Init Setup
 # ==========================
-port=lu.ports["delta"]
+port=lu.getPort("delta")
 addr=lu.getAddr()
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
 databaseDir=filePath+"/elasticsearch-2.3.4"
@@ -67,5 +67,5 @@ def main():
     except KeyboardInterrupt as e:
         lu.log("Keyboard interrupt. Shutting Down.")
         proc.kill()
-broadcaster = lu.nodeDiscovery("Delta")
+broadcaster = lu.nodeDiscovery("delta")
 main()
