@@ -35,10 +35,12 @@ class networkTable():
         self.minionNumber=self.minionNumber+1
         return self.minionNumber
     def updateEntry(self, entry):
+        #print(entry)
         try :
-            entry = json.loads(entry)
+            entry = json.loads(str(entry))
         except :
-            return 1
+           return 1
+
         entry["epoch"]=int(calendar.timegm(time.gmtime()))
         for i in self.networkTable:
             if(i["name"] == entry["name"]):
@@ -88,7 +90,7 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
         self.addr=lu.getAddr()
         self.jsonInfo={}
         for i in ports:
-            self.jsonInfo[i[0].lower()]+=i[1]
+            self.jsonInfo[i[0].lower()]=i[1]
         self.jsonInfo["name"]=self.name
         self.jsonInfo["addr"]=self.addr
         # only one listener per computer. This will be used by the omega server to broadcast its address. UDP
@@ -141,7 +143,7 @@ def main():
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.getPort("OmegaListen")))
     while broadcastListener.alive:
-        table.updateEntry(OmegaNodeDiscovery.jsonInfo)
+        table.updateEntry(json.dumps(broadcastListener.jsonInfo))
         msg = broadcastListener.getMsg()
         if msg:
             table.updateEntry(msg)

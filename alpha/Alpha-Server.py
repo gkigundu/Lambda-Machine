@@ -23,11 +23,6 @@ import lambdaUtils as lu
 os.chdir(filePath)
 
 # ==========================
-#   Global Defaults
-# ==========================
-port=lu.ports["alpha"]
-
-# ==========================
 #   Init Setup
 # ==========================
 if not os.path.exists(lu.paths["alpha_scripts"]):
@@ -160,9 +155,10 @@ class handler(http.server.BaseHTTPRequestHandler):
 # ==========================
 try:
     socketserver.TCPServer.allow_reuse_address = True
-    httpd = socketserver.TCPServer((lu.getAddr(), port), handler)
+    httpd = socketserver.TCPServer((lu.getAddr(),
+    lu.getPort("alpha")), handler)
     broadcastListener = lu.nodeDiscovery("alpha")
-    lu.log(" Serving @ " + str(lu.getAddr()) + ":" + str(port))
+    lu.log(" Serving @ " + str(lu.getAddr()) + ":" + str(lu.getPort("alpha")))
     httpd.serve_forever()
 except OSError:
     lu.error("Port in use - " + str(port))
