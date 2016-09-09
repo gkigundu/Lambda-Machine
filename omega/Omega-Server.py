@@ -20,8 +20,6 @@ sys.path.append(rootPath)
 import lambdaUtils as lu
 os.chdir(filePath)
 
-ADDR=lu.getAddr()
-
 # ==========================
 #   Network Table
 # ==========================
@@ -41,6 +39,7 @@ class networkTable():
             entry = json.loads(entry)
         except :
             return 1
+        entry["epoch"]=int(calendar.timegm(time.gmtime()))
         for i in self.networkTable:
             if(i["name"] == entry["name"]):
                 i = entry
@@ -55,13 +54,12 @@ class networkTable():
 # ==========================
 # implements a network handler for handling network table requests. returns a python list with http headers. TCP based
 class tableRequest():
-    addr=ADDR
-    port=lu.ports["omega"]
     def __init__(self):
         socketserver.TCPServer.allow_reuse_address = True
-        tableRequestServer = socketserver.TCPServer((self.addr, self.port), tableRequestHandler)    # HTTP
+        tableRequestServer = socketserver.TCPServer((lu.getAddr(), 0), tableRequestHandler)    # HTTP
         broadcastThread = threading.Thread(target=self._threadServe, args = (tableRequestServer,)).start()  # serve HTTP in thread
-        lu.log("Serving HTTP Get Table Requests @ " + str(self.addr) + ":" + str(self.port))
+        self.port = tableRequestServer.server_address[1]
+        lu.log("Serving HTTP Get Table Requests @ " + str(lu.getAddr()) + ":" + str(self.port))
     def _threadServe(self, httpd):
         httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -72,7 +70,7 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
     def do_GET(self): # check if contained to directory
         lu.log("Handling the Request to : " + self.path)
-        if(self.path == lu.paths["omega_TableJSON"]):
+        if(self.path == lu.paths["omega_Table"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getTable()).encode("UTF-8"))
         elif(self.path == lu.paths["omega_MinionTable"]):
@@ -85,9 +83,14 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
 #   OmegaNodeDiscovery
 # ==========================
 class OmegaNodeDiscovery(lu.nodeDiscovery):
-    def __init__(self, name):
+    def __init__(self, name, *ports):
         self.name=name
-        self.addr=ADDR
+        self.addr=lu.getAddr()
+        self.jsonInfo={}
+        for i in ports:
+            self.jsonInfo[i[0].lower()]+=i[1]
+        self.jsonInfo["name"]=self.name
+        self.jsonInfo["addr"]=self.addr
         # only one listener per computer. This will be used by the omega server to broadcast its address. UDP
         #      otherwise : " OSError: [Errno 98] Address already in use "
         self.readBuffer=queue.Queue(maxsize=self.queueSize)
@@ -95,22 +98,22 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
         listenThread = threading.Thread(target=self._listen, args = ())
         listenThread.start()
         # # broadcast the omega server's address on subnet
-        broadcastThread = threading.Thread(target=self._broadcast, args = (lu.ports["OmegaBroadcast"],))
+        broadcastThread = threading.Thread(target=self._broadcast, args = (lu.getPort("OmegaBroadcast"),))
         broadcastThread.start()
     def _broadcast(self, port):
           # continually sends out ping messages with the clients ip addr and name. UDP
         msg=str(self.addr)+" "+str(self.name)
-        lu.log("Broadcasting omega address on : " + str(lu.ports["OmegaBroadcast"]) )
+        lu.log("Broadcasting omega address on : " + str(lu.getPort("OmegaBroadcast")) )
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         while self.alive:
-            #lu.log("Broadcasting omega address on : " + str(lu.ports["OmegaBroadcast"]) )
-            sock.sendto(msg.encode("UTF-8"), (lu.getBroadcast(), lu.ports["OmegaBroadcast"]))
+            #lu.log("Broadcasting omega address on : " + str(lu.getPort("OmegaBroadcast"]) )
+            sock.sendto(msg.encode("UTF-8"), (lu.getBroadcast(), lu.getPort("OmegaBroadcast")))
             time.sleep(1)
     def _listen(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((self.addr, lu.ports["OmegaListen"])) # UDP
-        lu.log("Binded and listening on " + str((self.addr, lu.ports["OmegaListen"])))
+        sock.bind((self.addr, lu.getPort("OmegaListen"))) # UDP
+        lu.log("Binded and listening on " + str((self.addr, lu.getPort("OmegaListen"))))
         while self.alive:
             data, addr = sock.recvfrom(1024)
             time.sleep(.1)
@@ -133,11 +136,12 @@ def main():
     global table
     table = networkTable()
     # get messages over UDP to update networkTable
-    broadcastListener = OmegaNodeDiscovery("omega")
     tableRequestObj = tableRequest()
+    broadcastListener = OmegaNodeDiscovery("omega", ("omega_tableReq", tableRequestObj.port))
     # get UDP pings from network to create Network table entries
-    lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.ports["OmegaListen"]))
+    lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.getPort("OmegaListen")))
     while broadcastListener.alive:
+        table.updateEntry(OmegaNodeDiscovery.jsonInfo)
         msg = broadcastListener.getMsg()
         if msg:
             table.updateEntry(msg)

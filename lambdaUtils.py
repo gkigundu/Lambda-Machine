@@ -16,24 +16,21 @@ import ast
 #subNet="192.168.1.0/24"
 subNet="127.0.0.1/32"
 
-
 # ==========================
-#   Static Ports
+#   Global Ports
 # ==========================a
-# MAJOR BUG : need a dynamic distribution of these addresses.
-# if a non lambda-mchine process is using one of these address
-# the lambda-machine process will never connect.
-ports = {}
-ports["alpha"]             = 26000 # HTTP   # HTTP Website frontend
-ports["omega"]             = 26001 # HTTP   # Network Table and Minion ID requests
-ports["delta"]             = 9200  # TCP    # Elastic Database Access Point
-ports["lambda-M"]          = 26003 # HTTP   # push scripts for distribution
-# ports["lambda-m"]        = 26004 # TCP    # Lambda minions generate their own TCP socket address
+
+_ports = {}
+_ports["alpha"]            = None # HTTP   # HTTP Website frontend
+_ports["omega_tableReq"]      = None # HTTP   # Network Table and Minion ID requests
+_ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
+_ports["lambda-Master"]   = None # HTTP   # push scripts for distribution
 
 # used for host discovery
-ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
-ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subnet
+_ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
+_ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subnet
 
+_ports=dict((k.lower(), v) for k,v in _ports.items())
 # ==========================
 #   Global Paths
 # ==========================
@@ -44,8 +41,8 @@ paths["master_ClusterStat"]     = "/clusterStatus"      # GET & POST
 paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET
 paths["alpha_postScript"]       = "/submitToMaster"     # GET
-paths["alpha_scripts"]          = "codeScrolls"        # GET
-paths["omega_TableJSON"]        = "/nodesJSON"          # GET
+paths["alpha_scripts"]          = "codeScrolls"         # GET
+paths["omega_Nodes"]            = "/nodes"              # GET
 
 # ==========================
 #   Helper Functions
@@ -139,6 +136,33 @@ class subProc():
 #  Node Discovery
 # ==========================
 omegaAddr=None
+def getPort(portName):
+    global _ports
+    table=None
+    port=None
+    portName=portName.lower()
+    try:
+        return _ports[portName]
+    except:
+        pass
+    table=getNetworkTable()
+    for i in table:
+        try:
+            return i[portName]
+        except:
+            pass
+    return None
+def getNetworkTable():
+    msg=None
+    requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega"))+paths["omega_Table"]
+    with urllib.request.urlopen(requestURL) as response:
+        msg = response.read().decode("UTF-8")
+    try:
+        msg = json.loads(msg)
+    except:
+        error("Could not parse routing table")
+        return 1
+    return msg
 def getAddr():
     global addr
     global subNet
@@ -163,11 +187,10 @@ def getAddr():
     return addr
 def getBroadcast():
     return str(ipaddress.ip_network(subNet).broadcast_address)
-                #return ipaddress.ip_network(subNet)
 # get the address of the entity specified
-def getAddrOf(entityStr):
+def getEntityOf(entityStr):
     msg=None
-    requestURL='http://'+str(getOmegaAddr())+':'+str(ports["omega"])+paths["omega_Table"]
+    requestURL='http://'+str(getOmegaAddr())+':'+str(ports("omega"))+paths["omega_Table"]
     with urllib.request.urlopen(requestURL) as response:
         msg = response.read().decode("UTF-8")
     try:
@@ -177,11 +200,8 @@ def getAddrOf(entityStr):
         return 1
     foundAddr=None
     for entity in msg:
-        if(entity[1].name == entityStr):
-            try:
-                foundAddr=(entity[0], int(entity[3])) # if lambda-m port
-            except IndexError:
-                foundAddr=entity[0]
+        if(entity.name == entityStr):
+            foundAddr=entity
     return foundAddr
 def getOmegaAddr():
     global omegaAddr
@@ -195,7 +215,7 @@ def getOmegaAddr():
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.settimeout(.1)
             #log("Receiving Omega address on " + str((getBroadcast(), ports["OmegaBroadcast"])))
-            sock.bind((getBroadcast(), ports["OmegaBroadcast"])) # UDP
+            sock.bind((getBroadcast(), getPort("OmegaBroadcast"))) # UDP
             data, a = sock.recvfrom(1024)
             if(len(data) > 0):
                 omegaBroadcastReceived = True
@@ -220,25 +240,24 @@ class nodeDiscovery():
     UDPtimout=500
     jsonInfo=None
     broadcastAddr=getBroadcast()
-    def __init__(self, name, *port):
+    def __init__(self, name, *ports):
         # initializes a multicast UDP socket and broadcasts the nodes ip address to the subnet.
         #   It also listens for incoming messages
         # ports is a touple : (str(portName), int(portNum))
-        for i in port:
-            jsonInfo[i[0]]+=i[1]
         self.jsonInfo={}
-        self.jsonInfo["name"] = name
-        self.jsonInfo["addr"]=getAddr()
+        for i in ports:
+            self.jsonInfo[i[0].lower()]+=i[1]
+        self.jsonInfo["name"]=self.name
+        self.jsonInfo["addr"]=self.addr
         informOmega = threading.Thread(target=self._informOmega, args = ())
         informOmega.start()
     def _informOmega(self):
         # continually sends out ping messages with the clients ip addr and name. UDP
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         while self.alive:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             jsonDump=json.dumps(self.jsonInfo)
-            print(jsonDump)
-            sock.sendto(jsonDump.encode("UTF-8"), (getOmegaAddr(), ports["OmegaListen"]))
+            sock.sendto(jsonDump.encode("UTF-8"), (getOmegaAddr(), ports("OmegaListen")))
             time.sleep(self.sleepTime)
     def kill(self):
             # destroys the nodeDiscovery threads
