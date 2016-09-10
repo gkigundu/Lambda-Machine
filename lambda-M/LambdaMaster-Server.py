@@ -51,8 +51,10 @@ class ProgTable:
         for i in self.table:
             if(i["Hash"] == entry["Hash"]):
                 i = entry
+                lu.log("Replaced table entry")
                 return 0
-        self.table.append(entry) # append to tabe if entity does not exist
+        self.table.append(entry) # append to table if entity does not exist
+        lu.log("Added new table entry")
         return 0
     def getTable(self):
         return json.dumps(self.table)
@@ -112,6 +114,7 @@ class jsonPostHandler(http.server.BaseHTTPRequestHandler): # HTTP
             # parse data to json
             data = self.rfile.read(int(length)).decode("UTF-8")
             progTable.updateEntry(data)
+            print(progTable.getTable())
         else:
             self.setHeaders(500)
 main()
