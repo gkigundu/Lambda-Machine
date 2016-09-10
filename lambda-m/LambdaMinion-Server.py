@@ -39,7 +39,7 @@ class Minion():
     def __init__(self):
         # self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
-        self.OmegaAddr=lu.getOmegaAddr(self.addr)
+        self.OmegaAddr=lu.getOmegaAddr()
         self.ID = self._getMinionID()
         self._startScriptReceival = threading.Thread(target=self._startScriptReceival).start()
     def _startScriptReceival(self):
@@ -48,7 +48,7 @@ class Minion():
         lu.log("Minion " + str(self.ID) +" is waiting for scripts at TCP socket : " + self.addr+":"+self.listenPort)
         self.TCPScriptReceival.serve_forever()
     def _getMinionID(self):
-        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.ports["omega"])+lu.paths["omega_MinionTable"]
+        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.getPort("omega_tableReq"))+lu.paths["omega_MinionTable"]
         lu.log("Requesting " + requestURL)
         with urllib.request.urlopen(requestURL) as response:
             minionID = response.read().decode("UTF-8")

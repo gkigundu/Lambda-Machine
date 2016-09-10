@@ -54,14 +54,18 @@ class handler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
         if (self.path == lu.paths["alpha_nodeListing"]): # node
-            requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.getPort("omega"))+lu.paths["omega_TableJSON"]
+            requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.getPort("omega_tableReq"))+lu.paths["omega_Table"]
             lu.log("Requesting " + requestURL)
             msg=None
             try:
                 with urllib.request.urlopen(requestURL) as response:
                     self.setHeaders(200)
-                    msg = response.read().decode("UTF-8")
-                    self.wfile.write(msg.encode("UTF-8"))
+                    try:
+                        msg = response.read().decode("UTF-8")
+                        self.wfile.write(msg.encode("UTF-8"))
+                    except:
+                        lu.error("Could not parse routing table")
+                        return 1
             except:
                 lu.log("Could not get network table from Omega.")
         elif os.path.isfile(filePath):
@@ -105,15 +109,12 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]): # post to master
             masterAddr = lu.getAddrOf("Lambda-M")
-            # requestURL='http://'+str(masterAddr)+':'+str(lu.ports["lambda-M"])+lu.paths["master_postScript"]
-            # parse JSON request
             length = int(self.headers.get_all('content-length')[0])
             if(length > 0):
-                # urllib.request.urlopen(requestURL, self.rfile.read(length))
                 data = json.loads(self.rfile.read(length).decode("UTF-8"))
                 # self.setHeaders(200)
-                data["script"]=lu.paths["alpha_scripts"] + "/" + data["script"]
-                data["Hash"] = hashlib.md5(fileLoc).hexdigest()
+                data["FileLoc"]=lu.paths["alpha_scripts"] + "/" + data["script"]
+                data["Hash"] = hashlib.md5(data["FileLoc"]).hexdigest()
                 # f = open(, "rb")
                 # try:
                 #     byte = f.read(1)

@@ -21,10 +21,10 @@ subNet="127.0.0.1/32"
 # ==========================a
 
 _ports = {}
-_ports["alpha"]            = 26000 # HTTP   # HTTP Website frontend
-_ports["omega_tableReq"]      = None # HTTP   # Network Table and Minion ID requests
+_ports["alpha"]              = 26000 # HTTP   # HTTP Website frontend
+_ports["omega_tableReq"]     = None # HTTP   # Network Table and Minion ID requests
 _ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
-_ports["lambda-Master"]   = None # HTTP   # push scripts for distribution
+_ports["lambda-Master"]      = None # HTTP   # push scripts for distribution
 
 # used for host discovery
 _ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
@@ -42,7 +42,6 @@ paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET
 paths["alpha_postScript"]       = "/submitToMaster"     # GET
 paths["alpha_scripts"]          = "codeScrolls"         # GET
-paths["omega_Nodes"]            = "/nodes"              # GET
 
 # ==========================
 #   Helper Functions
@@ -137,31 +136,33 @@ class subProc():
 # ==========================
 omegaAddr=None
 def getPort(portName):
+    portName=portName.lower()
+    log("Getting Port : " + portName)
     global _ports
     table=None
     port=None
-    portName=portName.lower()
-    try:
+    if(_ports[portName]):
         return _ports[portName]
-    except:
-        pass
     table=getNetworkTable()
+    print(table)
     for i in table:
         try:
-            return i[portName]
+            _ports[portName] = i[portName]
+            return _ports[portName]
         except:
             pass
+    log("Could not get port : " + portName)
     return None
 def getNetworkTable():
     msg=None
-    requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega"))+paths["omega_Table"]
+    requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega_tableReq"))+paths["omega_Table"]
     with urllib.request.urlopen(requestURL) as response:
         msg = response.read().decode("UTF-8")
     try:
         msg = json.loads(msg)
     except:
         error("Could not parse routing table")
-        return 1
+        return None
     return msg
 def getAddr():
     global addr
@@ -228,6 +229,7 @@ def getOmegaAddr():
             time.sleep(.1)
     sock.close()
     omegaAddr=data.decode("UTF-8").split(" ")[0]
+    _ports["omega_tablereq"]=data.decode("UTF-8").split(" ")[1]
     log("Got Omega Address : " + omegaAddr)
     return omegaAddr
 class nodeDiscovery():
