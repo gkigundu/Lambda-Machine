@@ -38,7 +38,7 @@ mergeWithMaster:
 	git push origin master
 forcePushStage2DevToMaster:
 	git checkout dev-2
-	git push --repo=git@github.com:XDerekMaierX/$(pwd | sed 's/.*\///g').git
+	job push -y
 	git push -f git@github.com:XDerekMaierX/Lambda-Machine.git dev-2:master
 	git checkout master
 	git pull
