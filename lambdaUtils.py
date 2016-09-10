@@ -9,6 +9,7 @@ import inspect
 import re
 import json
 import ast
+import hashlib
 
 # ==========================
 #   Global Variables
@@ -24,7 +25,7 @@ _ports = {}
 _ports["alpha"]              = 26000 # HTTP   # HTTP Website frontend
 _ports["omega_tableReq"]     = None # HTTP   # Network Table and Minion ID requests
 _ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
-_ports["lambda-Master"]      = None # HTTP   # push scripts for distribution
+_ports["Master_scriptRec"]   = None # TCP   # push scripts for distribution
 
 # used for host discovery
 _ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
@@ -72,6 +73,11 @@ addr = None
 # ==========================
 #   Sub Process
 # ==========================
+def getHash(readInFile):
+    m = hashlib.md5()
+    with open(readInFile, 'rb') as f:
+        m.update(f.read())
+    return m.hexdigest()
 class subProc():
     errQueue=queue.Queue() # stderr
     outQueue=queue.Queue() # stdout
@@ -137,12 +143,12 @@ class subProc():
 omegaAddr=None
 def getPort(portName):
     portName=portName.lower()
-    log("Getting Port : " + portName)
     global _ports
     table=None
     port=None
     if(_ports[portName]):
         return _ports[portName]
+    log("Getting Port over network : " + portName)
     table=getNetworkTable()
     print(table)
     for i in table:
@@ -191,7 +197,7 @@ def getBroadcast():
 # get the address of the entity specified
 def getEntityOf(entityStr):
     msg=None
-    requestURL='http://'+str(getOmegaAddr())+':'+str(ports("omega"))+paths["omega_Table"]
+    requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega_tableReq"))+paths["omega_Table"]
     with urllib.request.urlopen(requestURL) as response:
         msg = response.read().decode("UTF-8")
     try:
@@ -201,7 +207,7 @@ def getEntityOf(entityStr):
         return 1
     foundAddr=None
     for entity in msg:
-        if(entity.name == entityStr):
+        if(entity["name"] == entityStr):
             foundAddr=entity
     return foundAddr
 def getOmegaAddr():
