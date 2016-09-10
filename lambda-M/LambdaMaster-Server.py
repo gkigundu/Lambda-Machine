@@ -33,18 +33,21 @@ def main():
 # ==========================
 #   Master
 # ==========================
-# Receive a program to be redirected to Lambda-m
 class Master:
+    # This object represents the master entity. It instantiates all of the networking instruments used for distributing programs across the network. 
     def __init__(self):
         self.addr=lu.getAddr()
         socketserver.TCPServer.allow_reuse_address = True
-        scriptPostHTTP = socketserver.TCPServer((self.addr, 0), scriptPostHandler)    # HTTP
+        scriptPostHTTP = socketserver.TCPServer((self.addr, 0), jsonPostHandler)    # HTTP
         self.port=str(scriptPostHTTP.server_address[1])
         receiveScriptThread = threading.Thread(target=self._threadServe, args = (scriptPostHTTP,)).start()  # serve HTTP in thread
         lu.log("Serving HTTP Post Script @ " + str(self.addr) + ":" + str(self.port))
     def _threadServe(self, httpd):
         httpd.serve_forever()
-class scriptPostHandler(http.server.BaseHTTPRequestHandler):
+
+
+class jsonPostHandler(http.server.BaseHTTPRequestHandler):
+    #This module allows for the posting of JSON files concerning programs to execute. When the master receives a JSON file it will purchase it and use the content to build a programs table. it  also provides the functionality to view statistics on the cluster. This mechanism Works in conjunction with Receiving TCP socket and a sending TCP socket to distribute programs to Lambda-Minion nodes.
     properPath=str([lu.paths[x] for x in [m.group(0) for l in lu.paths for m in [re.compile("^master_.*").search(l)] if m]] ) # Gets list of paths from lu.paths based on regex
     def setHeaders(self, code):
         self.send_response(code)

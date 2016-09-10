@@ -107,7 +107,7 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.write(fp.read(length))
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]): # post to master
-            masterAddr = lu.getEntityOf("Lambda-M")
+            masterAddr = lu.getEntityOf("Lambda-M")["master_scriptrec"]
             if not masterAddr:
                 lu.log("Could not get Master Addr.")
                 self.setHeaders(500)
@@ -120,9 +120,9 @@ class handler(http.server.BaseHTTPRequestHandler):
                 print(data)
                 self.setHeaders(200)
                 # send json to master http post
-                # send binary data to socket
 
-                # f = open(, "rb")
+                # send binary data to socket
+                # f = open(data["FileLoc"], "rb")
                 # try:
                 #     byte = f.read(1)
                 #     while byte != "":
