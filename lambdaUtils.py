@@ -194,8 +194,9 @@ def getAddr():
     return addr
 def getBroadcast():
     return str(ipaddress.ip_network(subNet).broadcast_address)
-# get the address of the entity specified
 def getEntityOf(entityStr):
+    # get the address of the entity specified
+    # returns JASON Dump
     msg=None
     requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega_tableReq"))+paths["omega_Table"]
     with urllib.request.urlopen(requestURL) as response:

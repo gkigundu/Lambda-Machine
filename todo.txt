@@ -1,4 +1,11 @@
 [] make all  ports dynamic
+[] convert threads to multiprocessing
+[] document each class
+[] document each function
+[] document each global variable
+[] document all return value formats
+[] logically segregate IPC from module communications
+
 
 ==================
 	Omega
