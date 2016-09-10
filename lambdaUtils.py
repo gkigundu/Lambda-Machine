@@ -16,8 +16,8 @@ import socketserver
 # ==========================
 #   Global Variables
 # ==========================
-#subNet="192.168.1.0/24"
-subNet="127.0.0.1/32"
+subNet="192.168.1.0/24"
+# subNet="127.0.0.1/32"
 
 # ==========================
 #   Global Ports
@@ -27,8 +27,8 @@ _ports = {}
 _ports["alpha"]              = 26000 # HTTP   # HTTP Website frontend
 _ports["omega_tableReq"]     = None # HTTP   # Network Table and Minion ID requests
 _ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
-_ports["Master_programRec"]   = None # TCP   # push program for distribution
-_ports["Master_JSONpost"]   = None # TCP   # push program for distribution
+_ports["Master_programRec"]  = None # TCP   # push program for distribution
+_ports["Master_JSONpost"]    = None # TCP   # push program for distribution
 # _ports["minion_scriptRec"]   = None # TCP   #
 
 # used for host discovery
@@ -254,8 +254,8 @@ def getAddr():
 def getBroadcast():
     return str(ipaddress.ip_network(subNet).broadcast_address)
 def getAddrOf(entityStr):
-    return getEntityOf(entityStr)["addr"]
-def getEntityOf(entityStr):
+    return getNodeByName(entityStr)["addr"]
+def getNodeByName(entityStr):
     # get the address of the entity specified
     # returns JASON Dump
     msg=None
@@ -282,8 +282,8 @@ def getOmegaAddr():
     while not omegaBroadcastReceived:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.settimeout(.1)
-            #log("Receiving Omega address on " + str((getBroadcast(), ports["OmegaBroadcast"])))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.settimeout(10)
             sock.bind((getBroadcast(), getPort("OmegaBroadcast"))) # UDP
             data, a = sock.recvfrom(1024)
             if(len(data) > 0):
@@ -291,10 +291,7 @@ def getOmegaAddr():
         except socket.timeout :
             sock.close()
             time.sleep(.1)
-            #log("Could not get Omega Server Address. Retrying")
-        except OSError :
-            sock.close()
-            time.sleep(.1)
+            log("Could not get Omega Server Address. Retrying")
     sock.close()
     omegaAddr=data.decode("UTF-8").split(" ")[0]
     _ports["omega_tablereq"]=data.decode("UTF-8").split(" ")[1]

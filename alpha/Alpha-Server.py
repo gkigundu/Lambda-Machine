@@ -117,8 +117,8 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                 data = json.loads(self.rfile.read(length).decode("UTF-8"))
                 data["FileLoc"]=lu.paths["alpha_scripts"] + "/" + data["script"]
                 data["Hash"] = lu.getHash(data["FileLoc"])
+                lu.log("Hashed Program : " + data["Hash"])
                 lu.postHTTP(json.dumps(data),masterAddr,lu.getPort("Master_JSONpost"),lu.paths["master_postScript"])
-                # TODO : Confirm that JSON post is stored
 
                 # send binary data to socket
                 lu.sendFile(data["FileLoc"],(masterAddr,int(lu.getPort("Master_programRec"))))
