@@ -18,7 +18,6 @@ import socketserver
 # ==========================
 #subNet="192.168.1.0/24"
 subNet="127.0.0.1/32"
-global progTable
 
 # ==========================
 #   Global Ports

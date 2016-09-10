@@ -40,12 +40,10 @@ class networkTable():
             entry = json.loads(str(entry))
         except :
            return 1
-
-        entry["epoch"]=int(calendar.timegm(time.gmtime()))  # BUG : not getting updated
+        entry["epoch"]=int(calendar.timegm(time.gmtime()))
         for i in self.networkTable:
             if(i["name"] == entry["name"]):
-                i = entry
-                return 0
+                self.networkTable.remove(i) # TODO : optomize
         self.networkTable.append(entry) # append to tabe if entity does not exist
         return 0
     def getTable(self):

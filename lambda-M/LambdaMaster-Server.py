@@ -50,14 +50,19 @@ class ProgTable:
             return 1
         for i in self.table:
             if(i["Hash"] == entry["Hash"]):
-                i = entry
-                lu.log("Replaced table entry")
-                return 0
+                self.table.remove(i)
+                lu.log("deleted table entry")
         self.table.append(entry) # append to table if entity does not exist
-        lu.log("Added new table entry")
+        lu.log("Added table entry")
         return 0
     def getTable(self):
         return json.dumps(self.table)
+    def getEntryByHash(self, fileHash):
+        entry=None
+        for i in self.table:
+            if (fileHash == i["Hash"]):
+                entry=i
+        return entry
 # ==========================
 #   Master
 # ==========================
@@ -72,6 +77,7 @@ class Master:
                 ("Master_JSONpost",self.HTTP_JSONListener.getListenPort()))
 class programBinaryHandler(socketserver.BaseRequestHandler): # TCP
     #This handler waits to receive binary program data. It will then hash the data and reference the process table to Determine the intent of the user. It works in conjunction with the JSON post Handler to forward the process to the minion nodes.
+    global progTable
     def handle(self):
         lu.log("Receiveing binary program.")
         fp = tempfile.NamedTemporaryFile()
@@ -79,10 +85,14 @@ class programBinaryHandler(socketserver.BaseRequestHandler): # TCP
         while data:
             fp.write(data)
             data = self.request.recv(1024)
+        lu.log("Finished Receiveing binary program.")
         fp.seek(0)
         fileHash = lu.getHash(fp.name)
+        progEntry = progTable.getEntryByHash(fileHash)
+        for i in progEntry["nodes"]:
+            print(i) ## SEND DATA TO NODES
         fp.close()
-        lu.log("Finished Receiveing binary program.")
+        lu.log("Finished sending binary program.")
 
 class jsonPostHandler(http.server.BaseHTTPRequestHandler): # HTTP
     #This handler allows for the posting of JSON files concerning programs to execute. When the master receives a JSON file it will purchase it and use the content to build a programs table. it  also provides the functionality to view statistics on the cluster. This mechanism Works in conjunction with Receiving TCP socket and a sending TCP socket to distribute programs to Lambda-Minion nodes.
@@ -114,7 +124,6 @@ class jsonPostHandler(http.server.BaseHTTPRequestHandler): # HTTP
             # parse data to json
             data = self.rfile.read(int(length)).decode("UTF-8")
             progTable.updateEntry(data)
-            print(progTable.getTable())
         else:
             self.setHeaders(500)
 main()
