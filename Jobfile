@@ -41,5 +41,4 @@ forcePushStage2DevToMaster:
 	job push -y
 	git push -f git@github.com:XDerekMaierX/Lambda-Machine.git dev-2:master
 	git checkout master
-	git pull
-	git push
+	job pull -y
