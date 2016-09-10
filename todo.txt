@@ -1,10 +1,13 @@
-[] make all  ports dynamic
+[x] make all possible ports dynamic
 [] convert threads to multiprocessing
 [] document each class
 [] document each function
 [] document each global variable
 [] document all return value formats
 [] logically segregate IPC from module communications
+[x] make broadcast Class use LAN broadcast address
+[] make sure nothing is busy waiting
+[] run profiler for longest function run time
 
 
 ==================
@@ -19,7 +22,7 @@
 [] lambda-m node tab
 [] debug tab
 [] script folders
-[] execute functionality
+[x] execute functionality
 [x] async xhr calls
 
 ==================
@@ -34,14 +37,13 @@
 ==================
 [] receive scripts
 [] status log
-[] http server
 
 ==================
 	Lambda-M
 ==================
 [] receive / distribute scripts to lambda-m
 [] anomaly detection
-[] make program hash the id
+[x] make program hash the id
 
 
 ==================

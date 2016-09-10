@@ -57,7 +57,7 @@ class ProgTable:
         return 0
     def getTable(self):
         return json.dumps(self.table)
-    def getEntryByHash(self, fileHash):
+    def getProgByHash(self, fileHash):
         entry=None
         for i in self.table:
             if (fileHash == i["Hash"]):
@@ -88,9 +88,12 @@ class programBinaryHandler(socketserver.BaseRequestHandler): # TCP
         lu.log("Finished Receiveing binary program.")
         fp.seek(0)
         fileHash = lu.getHash(fp.name)
-        progEntry = progTable.getEntryByHash(fileHash)
+        lu.log("Hashed Program : " + fileHash)
+        # print(progTable.getTable())
+        progEntry = progTable.getProgByHash(fileHash)
         for i in progEntry["nodes"]:
-            print(i) ## SEND DATA TO NODES
+            node=lu.getNodeByName(i)
+            lu.sendFile ( fp.name , (node["addr"], int(node["minion_scriptrec"]))) ## SEND DATA TO NODES
         fp.close()
         lu.log("Finished sending binary program.")
 
@@ -119,11 +122,11 @@ class jsonPostHandler(http.server.BaseHTTPRequestHandler): # HTTP
     def do_POST(self):
         lu.log("Handling the Post to : " + self.path)
         if(self.path == lu.paths["master_postScript"]):
-            self.setHeaders(200)
             length = self.headers['content-length']
             # parse data to json
             data = self.rfile.read(int(length)).decode("UTF-8")
             progTable.updateEntry(data)
+            self.setHeaders(200)
         else:
             self.setHeaders(500)
 main()

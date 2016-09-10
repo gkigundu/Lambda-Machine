@@ -6,6 +6,7 @@
 import sys, os
 import urllib.request
 import threading
+import tempfile
 import time
 import socketserver
 
@@ -26,7 +27,7 @@ def main():
     myMinion = Minion()
     lu.log(myMinion)
     # start broadcasting his address
-    while ( not myMinion.getPorts()[1] ):
+    while ( not myMinion.getPorts()[0][1] ):
         time.sleep(.5)
     broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, myMinion.getPorts() )
 # ==========================
@@ -36,7 +37,6 @@ class Minion():
     ID=None
     listenPort=None
     def __init__(self):
-        # self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.OmegaAddr=lu.getOmegaAddr()
         self.ID = lu.getHTTP(self.OmegaAddr, lu.getPort("omega_tableReq"), lu.paths["omega_MinionTable"])
@@ -44,18 +44,20 @@ class Minion():
     def __str__(self):
         return "Minion(" + self.ID + ") @ " + self.addr + " (" + str(self.getPorts()) + ")"
     def getPorts(self):
-        return (("minion_scriptRec."+self.ID, self.TCP_ScriptListener.getListenPort()))
+        return (("minion_scriptRec", self.TCP_ScriptListener.getListenPort()),)
 class MinionTCP_Handler(socketserver.BaseRequestHandler):   # handler to deposit script
     def handle(self):
-        print("receiveing")
-        script=""
+        lu.log("Receiveing binary program.")
+        fp = tempfile.NamedTemporaryFile()
         data = self.request.recv(1024)
         while data:
-            print(data)
-            script += data.decode("UTF-8")
+            fp.write(data)
             data = self.request.recv(1024)
-        print("minion data : " + script)
-        # !!! get script and execute !!!
+        fp.seek(0)
+        fileHash = lu.getHash(fp.name)
+        lu.log("Finished Receiveing binary program. Hash : " + fileHash)
+        fp.close()
+
 
 # this class runs the script it receives and outputs data to database
 # class executer:
