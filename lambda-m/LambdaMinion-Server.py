@@ -4,10 +4,10 @@
 #       1/Many per cluster
 
 import sys, os
-import socket, socketserver
 import urllib.request
 import threading
 import time
+import socketserver
 
 # ==========================
 #   Import lambdaUtils
@@ -24,36 +24,27 @@ os.chdir(filePath)
 def main():
     # make a friendly minion to work for you
     myMinion = Minion()
+    lu.log(myMinion)
     # start broadcasting his address
-    while ( not myMinion.listenPort ):
+    while ( not myMinion.getPorts()[1] ):
         time.sleep(.5)
-    broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, str(myMinion.listenPort))
+    broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, myMinion.getPorts() )
 # ==========================
 #   Minion Object
 # ==========================
 class Minion():
     ID=None
-    OmegaAddr=None
-    TCPScriptReceival=None
     listenPort=None
     def __init__(self):
         # self.port=lu.ports["lambda-m"]
         self.addr=lu.getAddr()
         self.OmegaAddr=lu.getOmegaAddr()
-        self.ID = self._getMinionID()
-        self._startScriptReceival = threading.Thread(target=self._startScriptReceival).start()
-    def _startScriptReceival(self):
-        self.TCPScriptReceival=socketserver.TCPServer((self.addr, 0), MinionTCP_Handler)
-        self.listenPort=str(self.TCPScriptReceival.server_address[1])
-        lu.log("Minion " + str(self.ID) +" is waiting for scripts at TCP socket : " + self.addr+":"+self.listenPort)
-        self.TCPScriptReceival.serve_forever()
-    def _getMinionID(self):
-        requestURL='http://'+str(self.OmegaAddr)+':'+str(lu.getPort("omega_tableReq"))+lu.paths["omega_MinionTable"]
-        lu.log("Requesting " + requestURL)
-        with urllib.request.urlopen(requestURL) as response:
-            minionID = response.read().decode("UTF-8")
-            lu.log("Got Minion ID : "+ minionID)
-        return minionID
+        self.ID = lu.getHTTP(self.OmegaAddr, lu.getPort("omega_tableReq"), lu.paths["omega_MinionTable"])
+        self.TCP_ScriptListener = lu.TCP_BackgroundProcess(self.addr, MinionTCP_Handler).listen()
+    def __str__(self):
+        return "Minion(" + self.ID + ") @ " + self.addr + " (" + str(self.getPorts()) + ")"
+    def getPorts(self):
+        return (("minion_scriptRec."+self.ID, self.TCP_ScriptListener.getListenPort()))
 class MinionTCP_Handler(socketserver.BaseRequestHandler):   # handler to deposit script
     def handle(self):
         print("receiveing")
