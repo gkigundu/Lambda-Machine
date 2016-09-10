@@ -30,7 +30,7 @@ if not os.path.exists(lu.paths["alpha_scripts"]):
 # ==========================
 #   Main user front end server
 # ==========================
-class handler(http.server.BaseHTTPRequestHandler):
+class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
     # set http headers
     def setHeaders(self, code):
         self.send_response(code)
@@ -107,29 +107,22 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.write(fp.read(length))
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]): # post to master
-            masterAddr = lu.getEntityOf("Lambda-M")["master_scriptrec"]
+            masterAddr = lu.getAddrOf("Lambda-M")
             if not masterAddr:
                 lu.log("Could not get Master Addr.")
                 self.setHeaders(500)
-            print(masterAddr)
             length = int(self.headers.get_all('content-length')[0])
             if(length > 0):
+                # send json to master http post
                 data = json.loads(self.rfile.read(length).decode("UTF-8"))
                 data["FileLoc"]=lu.paths["alpha_scripts"] + "/" + data["script"]
                 data["Hash"] = lu.getHash(data["FileLoc"])
-                print(data)
-                self.setHeaders(200)
-                # send json to master http post
+                lu.postHTTP(json.dumps(data),masterAddr,lu.getPort("Master_JSONpost"),lu.paths["master_postScript"])
+                # TODO : Confirm that JSON post is stored
 
                 # send binary data to socket
-                # f = open(data["FileLoc"], "rb")
-                # try:
-                #     byte = f.read(1)
-                #     while byte != "":
-                #         # Do stuff with byte.
-                #         byte = f.read(1)
-                # finally:
-                #     f.close()
+                lu.sendFile(data["FileLoc"],(masterAddr,int(lu.getPort("Master_programRec"))))
+                self.setHeaders(200)
             else:
                 lu.log("Nothing to send to master")
         else:
@@ -163,7 +156,7 @@ class handler(http.server.BaseHTTPRequestHandler):
 try:
     socketserver.TCPServer.allow_reuse_address = True
     httpd = socketserver.TCPServer((lu.getAddr(),
-    lu.getPort("alpha")), handler)
+    lu.getPort("alpha")), HTTP_webpageHandler)
     broadcastListener = lu.nodeDiscovery("alpha")
     lu.log(" Serving @ " + str(lu.getAddr()) + ":" + str(lu.getPort("alpha")))
     httpd.serve_forever()

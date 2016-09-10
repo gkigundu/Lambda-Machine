@@ -289,7 +289,7 @@
                 stat.setAttribute("class",      "circle");
                 // status indicator
                 deltaT=Math.floor(epochTime/1000-element.time);
-                redFactor=deltaT/SecondsToNodeLoss;
+                redFactor=deltaT/SecondsToNodeLoss; // BUG : not changeing color
                 if(redFactor > 1){
                     redFactor = 1;
                 }
