@@ -134,6 +134,7 @@
         colorSelected($('r2c1_scripts'), $(fileName))
         var conView=$("contentView_script")
         xhrGet("/nodes", function (xhr) {
+        _(xhr.response)
             listing=parseJSON(xhr.response); // got json object of nodes
             if( ! listing){
                 conView.innerHTML="Connection Broken";
@@ -261,7 +262,7 @@
                 return
             }
             // _("Nodes Found: ")
-            // __(listing)
+            __(typeof(listing))
             var newHierarchyTree = document.createElement("table");
             var epochTime = (new Date).getTime();
             listing.forEach(function(element, index, array){

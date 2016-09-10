@@ -41,15 +41,15 @@ class networkTable():
         except :
            return 1
 
-        entry["epoch"]=int(calendar.timegm(time.gmtime()))
+        entry["epoch"]=int(calendar.timegm(time.gmtime()))  # BUG : not getting updated
         for i in self.networkTable:
             if(i["name"] == entry["name"]):
                 i = entry
-                return
+                return 0
         self.networkTable.append(entry) # append to tabe if entity does not exist
         return 0
     def getTable(self):
-        return self.networkTable
+        return json.dumps(self.networkTable)
 
 # ==========================
 #   Table Requests
@@ -74,7 +74,7 @@ class tableRequestHandler(http.server.BaseHTTPRequestHandler):
         lu.log("Handling the Request to : " + self.path)
         if(self.path == lu.paths["omega_Table"]):
             self.setHeaders(200)
-            self.wfile.write(str(table.getTable()).encode("UTF-8"))
+            self.wfile.write(table.getTable().encode("UTF-8"))
         elif(self.path == lu.paths["omega_MinionTable"]):
             self.setHeaders(200)
             self.wfile.write(str(table.getMinionNumber()).encode("UTF-8"))
@@ -104,7 +104,7 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
         broadcastThread.start()
     def _broadcast(self, port):
           # continually sends out ping messages with the clients ip addr and name. UDP
-        msg=str(self.addr)+" "+str(self.name)
+        msg=str(self.addr)+" "+str(self.jsonInfo["omega_tablereq"])
         lu.log("Broadcasting omega address on : " + str(lu.getPort("OmegaBroadcast")) )
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
