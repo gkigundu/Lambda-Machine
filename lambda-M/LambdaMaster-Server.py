@@ -25,9 +25,9 @@ os.chdir(filePath)
 #   Main function
 # ==========================
 def main():
-    broadcastListener = lu.nodeDiscovery("Lambda-M")
     lu.log("Starting Master.")
     master = Master()
+    broadcastListener = lu.nodeDiscovery("Lambda-M", ("Master_scriptRec",master.port))
     lu.log("Master initialized.")
 
 # ==========================
@@ -36,10 +36,10 @@ def main():
 # Receive a program to be redirected to Lambda-m
 class Master:
     def __init__(self):
-        self.port=lu.ports["lambda-M"]
         self.addr=lu.getAddr()
         socketserver.TCPServer.allow_reuse_address = True
-        scriptPostHTTP = socketserver.TCPServer((self.addr, self.port), scriptPostHandler)    # HTTP
+        scriptPostHTTP = socketserver.TCPServer((self.addr, 0), scriptPostHandler)    # HTTP
+        self.port=str(scriptPostHTTP.server_address[1])
         receiveScriptThread = threading.Thread(target=self._threadServe, args = (scriptPostHTTP,)).start()  # serve HTTP in thread
         lu.log("Serving HTTP Post Script @ " + str(self.addr) + ":" + str(self.port))
     def _threadServe(self, httpd):

@@ -8,7 +8,6 @@ import socketserver
 import signal
 import urllib.request
 import json
-import hashlib
 
 import sys, os, re
 import cgi
@@ -108,13 +107,21 @@ class handler(http.server.BaseHTTPRequestHandler):
                 f.write(fp.read(length))
                 f.close()
         elif(self.path == lu.paths["alpha_postScript"]): # post to master
-            masterAddr = lu.getAddrOf("Lambda-M")
+            masterAddr = lu.getEntityOf("Lambda-M")
+            if not masterAddr:
+                lu.log("Could not get Master Addr.")
+                self.setHeaders(500)
+            print(masterAddr)
             length = int(self.headers.get_all('content-length')[0])
             if(length > 0):
                 data = json.loads(self.rfile.read(length).decode("UTF-8"))
-                # self.setHeaders(200)
                 data["FileLoc"]=lu.paths["alpha_scripts"] + "/" + data["script"]
-                data["Hash"] = hashlib.md5(data["FileLoc"]).hexdigest()
+                data["Hash"] = lu.getHash(data["FileLoc"])
+                print(data)
+                self.setHeaders(200)
+                # send json to master http post
+                # send binary data to socket
+
                 # f = open(, "rb")
                 # try:
                 #     byte = f.read(1)
@@ -123,7 +130,6 @@ class handler(http.server.BaseHTTPRequestHandler):
                 #         byte = f.read(1)
                 # finally:
                 #     f.close()
-                print("cat")
             else:
                 lu.log("Nothing to send to master")
         else:
@@ -162,6 +168,6 @@ try:
     lu.log(" Serving @ " + str(lu.getAddr()) + ":" + str(lu.getPort("alpha")))
     httpd.serve_forever()
 except OSError:
-    lu.error("Port in use - " + str(port))
+    lu.error("Port in use - " + str(lu.getPort("alpha")))
 except KeyboardInterrupt:
     sys.exit(0)

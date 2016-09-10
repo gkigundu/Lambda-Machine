@@ -134,7 +134,6 @@
         colorSelected($('r2c1_scripts'), $(fileName))
         var conView=$("contentView_script")
         xhrGet("/nodes", function (xhr) {
-        _(xhr.response)
             listing=parseJSON(xhr.response); // got json object of nodes
             if( ! listing){
                 conView.innerHTML="Connection Broken";
@@ -161,7 +160,7 @@
                     var p=createAppend("p",td2);
                     p.innerHTML=elem.name
                     var p=createAppend("p",td3);
-                    p.innerHTML=Math.floor(epochTime/1000-elem.time)
+                    p.innerHTML=Math.floor(epochTime/1000-elem.epoch) // TODO : update this live everytime node listing is received
                 }
             });
             createAppend("br",conView);
@@ -262,7 +261,6 @@
                 return
             }
             // _("Nodes Found: ")
-            __(typeof(listing))
             var newHierarchyTree = document.createElement("table");
             var epochTime = (new Date).getTime();
             listing.forEach(function(element, index, array){
