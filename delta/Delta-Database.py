@@ -8,7 +8,7 @@
 import urllib.request
 import sys, os, zipfile
 import shlex
-import subprocess
+import subprocess as subP
 
 # ==========================
 #   Import lambdaUtils
@@ -32,13 +32,13 @@ outputZip=filePath+"/master.zip"
 #   Elastic Sub Proc
 # ==========================
 def deltaStart():
-    command = "bash " + databaseDir + "/bin/elasticsearch --network.host " + addr
-    proc = subprocess.Popen(shlex.split(command), cwd=databaseDir, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while not proc.poll():
-        try:        print(proc.communicate(timeout=1))
-        except:     pass
-    status=proc.poll()
-    lu.log("Finished with status : " + str(status))
+    command = "bash bin/elasticsearch --network.host " + addr
+    with subP.Popen(shlex.split(command), cwd=databaseDir, stdout=subP.PIPE, stderr=subP.PIPE, universal_newlines=True) as proc:
+        for line in proc.stdout:
+            print(line, end='')
+        for line in proc.stderr:
+            print(line, end='')
+    lu.log("Delta Terminated.")
 
 # ==========================
 #   Main Function
@@ -69,8 +69,8 @@ def main():
         deltaStart()
     except IOError as e:
         lu.error("Write error", e)
-    except KeyboardInterrupt as e:
-        lu.log("Keyboard interrupt. Shutting Down.")
-        proc.kill()
+    # except KeyboardInterrupt as e:
+    #     lu.log("Keyboard interrupt. Shutting Down.")
+    #     proc.kill()
 broadcaster = lu.nodeDiscovery("delta")
 main()
