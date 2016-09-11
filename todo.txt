@@ -31,6 +31,7 @@
 [] fix scroll overflow in list hierarchy
 [] add logo
 [] make top buttons nice looking
+[] make script listing live
 
 ==================
 	Lambda-m
