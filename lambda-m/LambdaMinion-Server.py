@@ -12,7 +12,7 @@ import shutil
 import shlex
 import socketserver
 import os
-import subprocess
+import subprocess as subP
 import zipfile
 import re
 
@@ -98,7 +98,7 @@ def install( command):
 #   Executer
 # ==========================
 def blockSubProc( command):
-    p = subprocess.Popen(shlex.split(command))
+    p = subP.Popen(shlex.split(command))
     p.wait()
     lu.log("Command [" + command + "] Got return code : " + str(p.poll()))
 class Executer:
@@ -119,7 +119,7 @@ class Executer:
         if zipfile.is_zipfile(self.filePath) :
             ZipFile = zipfile.ZipFile(self.filePath)
             workingDir=os.path.dirname(self.filePath)
-            subprocess.Popen(shlex.split("unzip -d " + workingDir + " " +self.filePath)).wait() # python unzip does not preserve file permissions so i must use linux unzip.
+            subP.Popen(shlex.split("unzip -d " + workingDir + " " +self.filePath)).wait() # python unzip does not preserve file permissions so i must use linux unzip.
             # ZipFile.extractall(workingDir) # https://bugs.python.org/issue15795
             self.status=-2
             for root, dirs, files in os.walk(workingDir):
@@ -137,11 +137,14 @@ class Executer:
     def execute(self, command):
         lu.log("Exicuting : " + command)
         self.status=0
-        self.proc = subprocess.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
         self.waitForSubProc()
     def waitForSubProc(self):
         while not self.proc.poll():
-            print(self.proc.communicate(timeout=15))
+            for line in self.proc.stdout:
+                print(line, end='')
+            for line in proc.stderr:
+                print(line, end='')
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
 
