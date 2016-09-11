@@ -1,5 +1,4 @@
 delta/elasticsearch-2.3.4
 global.log
 __pycache__/*
-alpha/codeScrolls/*
 *.bak
