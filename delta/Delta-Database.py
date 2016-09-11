@@ -38,6 +38,7 @@ def deltaStart():
             print(line, end='')
         for line in proc.stderr:
             print(line, end='')
+        time.sleep(1)
     lu.log("Delta Terminated.")
 
 # ==========================
