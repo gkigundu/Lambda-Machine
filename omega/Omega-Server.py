@@ -140,6 +140,7 @@ def main():
     broadcastListener = OmegaNodeDiscovery("omega", ("omega_tableReq", tableRequestObj.port))
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.getPort("OmegaListen")))
+    lu.log("Initialized")
     while broadcastListener.alive:
         table.updateEntry(json.dumps(broadcastListener.jsonInfo))
         msg = broadcastListener.getMsg()

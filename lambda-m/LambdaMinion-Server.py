@@ -9,6 +9,7 @@ import threading
 import tempfile
 import time
 import shutil
+import shlex
 import socketserver
 import os
 import subprocess
@@ -28,6 +29,7 @@ os.chdir(filePath)
 #   Main Function
 # ==========================
 def main():
+    checkDependencies("unzip")
     # make a friendly minion to work for you
     myMinion = Minion()
     lu.log(myMinion)
@@ -35,6 +37,7 @@ def main():
     while ( not myMinion.getPorts()[0][1] ):
         time.sleep(.5)
     broadcaster = lu.nodeDiscovery("Lambda-m." + myMinion.ID, myMinion.getPorts() )
+    lu.log("Initialized")
 # ==========================
 #   Minion Object
 # ==========================
@@ -68,7 +71,36 @@ class MinionTCP_Handler(socketserver.BaseRequestHandler):   # handler to deposit
             fp.close()
 
 
-# this class runs the script it receives and outputs data to database
+# ==========================
+#   Dependencies for minions
+# ==========================
+def isInstalled( command):
+    # this class runs the script it receives and outputs data to database
+    for path in os.getenv("PATH").split(os.path.pathsep):
+        fullPath = path + os.sep + command
+        if os.path.exists(fullPath):
+            return True
+    return False
+def checkDependencies(*prog):
+    for i in prog:
+        if not isInstalled(i):
+            install(i)
+def install( command):
+    if isInstalled("apt"):
+        blockSubProc("sudo apt-get install " + command)
+    elif isInstalled("dnf"):
+        blockSubProc("sudo dnf install " + command)
+    elif isInstalled("yum"):
+        blockSubProc("sudo yum install " + command)
+    elif isInstalled("pacman"):
+        blockSubProc("sudo pacman -S " + command)
+# ==========================
+#   Executer
+# ==========================
+def blockSubProc( command):
+    p = subprocess.Popen(shlex.split(command))
+    p.wait()
+    lu.log("Command [" + command + "] Got return code : " + str(p.poll()))
 class Executer:
     fileHash=None
     status=None
@@ -76,46 +108,42 @@ class Executer:
     # 1  : Completed Sucessfully
     # -1 : invalid file
     # -2 : No makefile
+    # -3 : unzip not installed on node
     def __init__(self, filePath,fileHash, folder):
         self.fileHash=fileHash
         self.folder=folder
         self.filePath=filePath
         self.executeSetup = threading.Thread(target=self._executeSetup).start()
     def _executeSetup(self):
+        # ZIP FILE
         if zipfile.is_zipfile(self.filePath) :
             ZipFile = zipfile.ZipFile(self.filePath)
             workingDir=os.path.dirname(self.filePath)
-            ZipFile.extractall(workingDir)
+            subprocess.Popen(shlex.split("unzip -d " + workingDir + " " +self.filePath)).wait() # python unzip does not preserve file permissions so i must use linux unzip.
+            # ZipFile.extractall(workingDir) # https://bugs.python.org/issue15795
             self.status=-2
             for root, dirs, files in os.walk(workingDir):
                 for f in files:
                     if re.match("makefile", f ,flags=re.IGNORECASE):
-                         self.executeMake(os.path.join(root, f))
+                        self.filePath=os.path.join(root, f)
+                        command = "make"
             if self.status == -2:
                 lu.log("Could not find make file")
+        # TEXT SCRIPT
         else:
-            self.executeBash(filePath)
-        lu.log("Executer Finished with status : " + str(self.status))
+            command = "bash -c cd " + os.path.dirname(self.filePath) + " && ./" + os.path.basename(self.filePath)
+        self.execute(command)
         shutil.rmtree(self.folder)
-    def executeBash(self, f):
-        lu.log("Executer Initialized with file : " + f)
-        command = "bash -c cd " + os.path.dirname(f) + " && ./" + os.path.basename(f)
+    def execute(self, command):
         lu.log("Exicuting : " + command)
         self.status=0
-        p = subprocess.Popen(command.split(" "))
-        # execute HERE
-        self.status=1
-    def executeMake(self, f):
-        lu.log("Executer Initialized with file : " + f)
-        command = "bash -c cd " + os.path.dirname(f) + " && make"
-        lu.log("Exicuting : " + command)
-        self.status=0
-        p = subprocess.Popen(command.split(" "))
-        p.wait(timeout=15)
-        print(p.communicate(timeout=15))
-        print(p.returncode)
-        # execute HERE
-        self.status=1
+        self.proc = subprocess.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.waitForSubProc()
+    def waitForSubProc(self):
+        while not self.proc.poll():
+            print(self.proc.communicate(timeout=15))
+        self.status=self.proc.poll()
+        lu.log("Executer Finished with status : " + str(self.status))
 
 
 main()

@@ -136,68 +136,6 @@ def getHash(fileLoc):
         m.update(f.read())
     return m.hexdigest()
 # ==========================
-#   Sub Process
-# ==========================
-class subProc():
-    errQueue=queue.Queue() # stderr
-    outQueue=queue.Queue() # stdout
-    subProc=None
-    def getOutput(self):
-    # returns touple(stdout, stderr)
-    # if there is not output stdout=None or stderr=None
-        time.sleep(.1)
-        out=None
-        err=None
-        if(not self.queuesEmpty()):
-            try:    out=self.outQueue.get(False).strip()
-            except: out=None
-            try:    err=self.errQueue.get(False).strip()
-            except: err=None
-        return (out, err)
-    def kill(self):
-        self.subProc.kill()
-    def queuesEmpty(self):
-        # returns true if there is no data left in stdout or stderr
-        if(self.errQueue.empty() and self.outQueue.empty()):
-            return True
-        else:
-            return False
-    def isAlive(self):
-        # returns the state of the process:
-        #   None  : process has not started yet
-        #   1     : Process is currently executing
-        #   0     : Process has terminated
-        if (self.subProc):
-            if (self.subProc.poll() == None):
-                return 1 # alive and running
-            else:
-                return 0 # terminated
-        else:
-            return None # has not been born
-    def waitForSubProc(self):
-        # waits for the subprocess to start
-        while (self.isAlive() == None):
-            time.sleep(.1)
-    def __init__(self, command):
-        # initialized 3 threads. Subprocess with command, stdout reader, and stderr reader. All asynchronous.
-        threading.Thread(target=self._subProcess, args=(command,), daemon=True).start()
-        self.waitForSubProc()
-        threading.Thread(target=self._ioQueue, args=(self.subProc.stdout, self.outQueue), daemon=True).start()
-        threading.Thread(target=self._ioQueue, args=(self.subProc.stderr, self.errQueue), daemon=True).start()
-    def _ioQueue(self, pipe, queue):
-        # setup a pipe to output to a queue
-        self.waitForSubProc()
-        out=None
-        while(1):
-            for line in pipe:
-                queue.put(str(line.decode("UTF-8")),block=True, timeout=None)
-            if(self.isAlive() == 0):
-                break
-            time.sleep(.1)
-    def _subProcess(self, command):
-        # execute sub process from a thread.
-        self.subProc = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-# ==========================
 #  Node Discovery
 # ==========================
 omegaAddr=None
