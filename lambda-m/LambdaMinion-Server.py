@@ -146,6 +146,7 @@ class Executer:
                 print(line, end='')
             for line in self.proc.stderr:
                 print(line, end='')
+            time.sleep(1)
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
 
