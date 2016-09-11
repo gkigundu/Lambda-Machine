@@ -127,11 +127,12 @@ class Executer:
                     if re.match("makefile", f ,flags=re.IGNORECASE):
                         self.filePath=os.path.join(root, f)
                         command = "make"
+                        self.status=None
             if self.status == -2:
                 lu.log("Could not find make file")
         # TEXT SCRIPT
         else:
-            command = "bash -c cd " + os.path.dirname(self.filePath) + " && ./" + os.path.basename(self.filePath)
+            command = "./" + os.path.basename(self.filePath)
         self.execute(command)
         shutil.rmtree(self.folder)
     def execute(self, command):
@@ -143,7 +144,7 @@ class Executer:
         while not self.proc.poll():
             for line in self.proc.stdout:
                 print(line, end='')
-            for line in proc.stderr:
+            for line in self.proc.stderr:
                 print(line, end='')
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
