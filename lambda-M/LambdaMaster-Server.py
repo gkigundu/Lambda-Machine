@@ -32,7 +32,7 @@ def main():
     progTable = ProgTable()
     master = Master()
     broadcastListener = lu.nodeDiscovery("Lambda-M", master.getPorts())
-    lu.log("Master initialized.")
+    lu.log("Initialized")
 
 # ==========================
 #   Program Table

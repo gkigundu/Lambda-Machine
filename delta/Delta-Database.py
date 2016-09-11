@@ -7,6 +7,7 @@
 
 import urllib.request
 import sys, os, zipfile
+import shlex
 import subprocess
 
 # ==========================
@@ -26,6 +27,18 @@ addr=lu.getAddr()
 urlToGet="https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/2.3.4/elasticsearch-2.3.4.zip"
 databaseDir=filePath+"/elasticsearch-2.3.4"
 outputZip=filePath+"/master.zip"
+
+# ==========================
+#   Elastic Sub Proc
+# ==========================
+def deltaStart():
+    command = "bash " + databaseDir + "/bin/elasticsearch --network.host " + addr
+    proc = subprocess.Popen(shlex.split(command), cwd=databaseDir, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while not proc.poll():
+        try:        print(proc.communicate(timeout=1))
+        except:     pass
+    status=proc.poll()
+    lu.log("Finished with status : " + str(status))
 
 # ==========================
 #   Main Function
@@ -50,18 +63,10 @@ def main():
             lu.log("Removing zip file.")
             os.remove(outputZip)
             lu.log("Set up elastic successfully.")
+        lu.log("Initialized")
         lu.log("Starting elastic.")
         lu.log("=================")
-
-        # run elastic search in python wrapper
-        command = "bash " + databaseDir + "/bin/elasticsearch --network.host " + addr
-        proc = lu.subProc(command)
-        while(proc.isAlive() != 0 or not proc.queuesEmpty()):
-            out=proc.getOutput()
-            if out[0]:
-                lu.log(out[0])
-            if out[1]:
-                lu.error(out[1])
+        deltaStart()
     except IOError as e:
         lu.error("Write error", e)
     except KeyboardInterrupt as e:
