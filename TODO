@@ -1,20 +1,34 @@
+
+==================
+	Global
+==================
 [x] make all possible ports dynamic
-[] convert threads to multiprocessing
+[] convert neccesary threads to multiprocessing
 [] document each class
 [] document each function
 [] document each global variable
 [] document all return value formats
+[] document what each file does
 [] logically segregate IPC from module communications
 [x] make broadcast Class use LAN broadcast address
 [] make sure nothing is busy waiting
 [] run profiler for longest function run time
+[] remove unnecessary imports
+[] docker functionality
+[] convert TCP Servers to use TCP_BackgroundProcess handler
 
+==================
+	Lambda Utils
+==================
+[] convert udp broadcast to single word entity ping
+[] post entity information to omega HTTP server
 
 ==================
 	Omega
 ==================
 [x] add listening port to table entry
-
+[] convert udp listener from json to single word entity ping
+[] make HTTP server to get entity info
 
 ==================
 	Alpha
@@ -22,7 +36,6 @@
 [] lambda-m node tab
 [] debug tab
 [] script folders
-[x] execute functionality
 [x] async xhr calls
 
 ==================
@@ -32,22 +45,27 @@
 [] add logo
 [] make top buttons nice looking
 [] make script listing live
+[] make node status circle active
+[] make central entity listing JSON entry that updates every tick
+[] Javascript function to generate divs
 
 ==================
 	Lambda-m
 ==================
-[] receive scripts
+[x] receive scripts
+[x] execute functionality
 [] status log
+[] ship data to database
 
 ==================
 	Lambda-M
 ==================
-[] receive / distribute scripts to lambda-m
+[x] receive / distribute scripts to lambda-m
 [] anomaly detection
 [x] make program hash the id
-
 
 ==================
 	Delta
 ==================
 [] provide database info hierarchy
+[] install Java functionality
