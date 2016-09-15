@@ -16,8 +16,8 @@ import socketserver
 # ==========================
 #   Global Variables
 # ==========================
-# subNet="192.168.1.0/24"
-subNet="127.0.0.1/32"
+subNet="192.168.1.0/24"
+# subNet="127.0.0.1/32"
 
 # ==========================
 #   Global Ports
@@ -75,15 +75,14 @@ def error(string, *e):
     sys.stderr.flush()
     sys.exit(1)
 addr = None
-# ==========================
-#   Program Distribution
-# ==========================
+# =====================================
+#   TCP Server as background thread
+# =====================================
 class TCP_BackgroundProcess:
     listenPort=None
     def __init__(self, addr, handler):
         self.addr=addr
         self.handler=handler
-    ## LISTEN PORT
     def listen(self ):
         self._startScriptReceival = threading.Thread(target=self._listen).start()
         while ( not self.listenPort ):
@@ -97,6 +96,9 @@ class TCP_BackgroundProcess:
         self.listeningSocket.serve_forever()
     def getListenPort(self):
         return self.listenPort
+# ==========================
+#   Program Distribution
+# ==========================
 ## Binary
 def sendMsg( msg, dest): # sends message as data
     msg=str(msg)
