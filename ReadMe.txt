@@ -1,9 +1,17 @@
 ====================
 == Project Info
 ====================
-Started : 6  July 2016
-Revised : 11 Sep  2016
-Version : 0.15
+Initiated : 6  July 2016
+Revised   : 11 Sep  2016
+Version   : 0.15 (Alpha)
+
+Production Team        : Monolith
+Project Title          : Lambda Machine
+
+== Team
+Lead Developer         : Derek Maier
+Development Assistence : David Nelson
+                       : Weston Ford
 
 Project Layout:
-https://docs.google.com/document/d/1MHSldaDuANaTkXEBYXXmD2ZgtJQvfWSklaHroLfppU4/edit?usp=sharing
+Tinyurl.com/Lambda-Machine
