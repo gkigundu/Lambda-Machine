@@ -1,3 +1,6 @@
+# The job program required to run this program can be found here:
+# https://github.com/XDerekMaierX/BashTools/blob/master/bin/job
+
 pull:
     git pull
 push:
@@ -8,13 +11,10 @@ viewChanges:
     git log -p
 wordCountPy:
     find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | wc -l
-forcePullMaster:
-    git fetch --all
-    git reset --hard origin/master
-killPython:
+kill:
     sudo kill $(ps -ef | grep "alpha\|omega\|lambda\|delta" | grep python -i | grep -v "grep" | awk '{print $2}')
-startAll:
-	# for developers
+start:
+    # for developers
     job -y killPython || echo -n ""
     # xterm -geometry 70x10+0-0 -e sleep 2 &
     # xterm -geometry 70x10+0-150 -e sleep 2 &
