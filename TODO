@@ -22,6 +22,7 @@
 ==================
 [] convert udp broadcast to single word entity ping
 [] post entity information to omega HTTP server
+[] document memoization techniques
 
 ==================
 	Omega
@@ -56,6 +57,7 @@
 [x] execute functionality
 [] status log
 [] ship data to database
+[] terminate find Makefile loop when file found
 
 ==================
 	Lambda-M
