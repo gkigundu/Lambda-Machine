@@ -1,4 +1,4 @@
-# The job program required to run this program can be found here:
+# The 'job' program required to run this program can be found here:
 # https://github.com/XDerekMaierX/BashTools/blob/master/bin/job
 
 pull:
@@ -15,11 +15,7 @@ kill:
     sudo kill $(ps -ef | grep "alpha\|omega\|lambda\|delta" | grep python -i | grep -v "grep" | awk '{print $2}')
 start:
     # for developers
-    job -y killPython || echo -n ""
-    # xterm -geometry 70x10+0-0 -e sleep 2 &
-    # xterm -geometry 70x10+0-150 -e sleep 2 &
-    # xterm -geometry 70x10+0-300 -e sleep 2 &
-    # xterm -geometry 70x10+0-450 -e sleep 2 &
+    job -y kill || echo -n ""
     xterm -geometry 70x10+0-0 -e ./alpha/Alpha-Server.py &
     xterm -geometry 70x10+0-150 -e ./omega/Omega-Server.py &
     xterm -geometry 70x10+0-300 -e ./lambda-M/LambdaMaster-Server.py &
