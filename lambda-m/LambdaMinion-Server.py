@@ -113,7 +113,7 @@ class Executer:
         self.fileHash=fileHash
         self.folder=folder
         self.filePath=filePath
-        self.dataBase=lu.getAddrOf("delta") + lu.getPort("delta") 
+        self.dataBase=lu.getAddrOf("delta") + lu.getPort("delta")
         self.executeSetup = threading.Thread(target=self._executeSetup).start()
         print("\n\n\n" + str(self.dataBase))
     def _executeSetup(self):
