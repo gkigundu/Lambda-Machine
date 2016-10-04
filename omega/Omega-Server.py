@@ -141,12 +141,17 @@ def main():
     # get UDP pings from network to create Network table entries
     lu.log("Getting UDP network pings on : " + str(broadcastListener.broadcastAddr) + ", from port : " + str(lu.getPort("OmegaListen")))
     lu.log("Initialized")
+    output=5
+    outputCount=0
     while broadcastListener.alive:
         table.updateEntry(json.dumps(broadcastListener.jsonInfo))
         msg = broadcastListener.getMsg()
         if msg:
             table.updateEntry(msg)
         else:
+            outputCount = outputCount + 1
+            if (outputCount > output):
+                outputCount = 0
+                print(table.getTable())
             time.sleep(1)
-            print(table.getTable())
 main()

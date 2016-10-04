@@ -113,7 +113,9 @@ class Executer:
         self.fileHash=fileHash
         self.folder=folder
         self.filePath=filePath
+        self.dataBase=lu.getAddrOf("delta") + lu.getPort("delta") 
         self.executeSetup = threading.Thread(target=self._executeSetup).start()
+        print("\n\n\n" + str(self.dataBase))
     def _executeSetup(self):
         # ZIP FILE
         if zipfile.is_zipfile(self.filePath) :
@@ -129,7 +131,7 @@ class Executer:
                         command = "make"
                         self.status=None
             if self.status == -2:
-                lu.log("Could not find make file")
+                lu.log("Could not find Makefile")
         # TEXT SCRIPT
         else:
             command = "./" + os.path.basename(self.filePath)
@@ -139,8 +141,8 @@ class Executer:
         lu.log("Exicuting : " + command)
         self.status=0
         self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
-        self.waitForSubProc()
-    def waitForSubProc(self):
+        self.pollSubProc()
+    def pollSubProc(self):
         while not self.proc.poll():
             for line in self.proc.stdout:
                 print(line, end='')
