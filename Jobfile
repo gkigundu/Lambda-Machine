@@ -12,26 +12,15 @@ viewChanges:
 wordCountPy:
     find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | wc -l
 kill:
-    kill $(ps -ef | grep "alpha\|omega\|lambda\|delta" | grep python -i | grep -v "grep" | awk '{print $2}')
+    kill -9 $(ps -ef | grep "alpha\|omega\|lambda\|delta\|elastic" | grep "python\|elasticsearch" -i | grep -v "grep" | awk '{print $2}')
 start:
     # for developers
     job -y kill || echo -n ""
-    # xterm -geometry 70x10+0-0 -e sleep 2 &
-    # xterm -geometry 70x10+0-150 -e sleep 2 &
-    # xterm -geometry 70x10+0-300 -e sleep 2 &
-    # xterm -geometry 70x10+0-450 -e sleep 2 &
-    # xterm -geometry 70x10+0-0 -e ./alpha/Alpha-Server.py &
-    # xterm -geometry 70x10+0-150 -e ./omega/Omega-Server.py &
-    # xterm -geometry 70x10+0-300 -e ./lambda-M/LambdaMaster-Server.py &
-    # xterm -geometry 70x10+0-450 -e ./delta/Delta-Database.py &
     ./alpha/Alpha-Server.py &
     ./omega/Omega-Server.py &
     ./lambda-M/LambdaMaster-Server.py &
     ./delta/Delta-Database.py &
     # many minions
-    ./lambda-m/LambdaMinion-Server.py &
-    ./lambda-m/LambdaMinion-Server.py &
-    ./lambda-m/LambdaMinion-Server.py &
     ./lambda-m/LambdaMinion-Server.py &
 mpad:
     mousepad ./alpha/Alpha-Server.py ./lambdaUtils.py  ./omega/Omega-Server.py ./lambda-M/LambdaMaster-Server.py     ./delta/Delta-Database.py  ./lambda-m/LambdaMinion-Server.py &

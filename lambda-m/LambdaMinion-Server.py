@@ -10,6 +10,7 @@ import tempfile
 import time
 import shutil
 import shlex
+import json
 import socketserver
 import os
 import subprocess as subP
@@ -113,9 +114,8 @@ class Executer:
         self.fileHash=fileHash
         self.folder=folder
         self.filePath=filePath
-        self.dataBase=lu.getAddrOf("delta") + lu.getPort("delta")
+        self.dataBase=lu.getAddrOf("delta") + ":" + str(lu.getPort("delta")) + "/"
         self.executeSetup = threading.Thread(target=self._executeSetup).start()
-        print("\n\n\n" + str(self.dataBase))
     def _executeSetup(self):
         # ZIP FILE
         if zipfile.is_zipfile(self.filePath) :
@@ -143,12 +143,14 @@ class Executer:
         self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
         self.pollSubProc()
     def pollSubProc(self):
-        while not self.proc.poll():
+        while self.proc.poll() == None:
+            lu.log(self.dataBase + "raw/stdout/" + self.fileHash + "/"+"\n")
             for line in self.proc.stdout:
-                print(line, end='')
+                lu.log(urllib.request.urlopen(url="http://"+self.dataBase + "raw/stdout/" + self.fileHash + "/", data=json.dumps({"line":str(line)}).encode("UTF-8")).info())
             for line in self.proc.stderr:
-                print(line, end='')
+                lu.log(urllib.request.urlopen(url="http://"+self.dataBase + "raw/stderr/" + self.fileHash + "/", data=json.dumps({"line":str(line)}).encode("UTF-8")).info())
             time.sleep(1)
+
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
 
