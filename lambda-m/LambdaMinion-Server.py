@@ -143,7 +143,7 @@ class Executer:
         self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
         self.pollSubProc()
     def pollSubProc(self):
-        while self.proc.poll() == None:
+        while self.proc.poll() == None: # apply line number 
             lu.log(self.dataBase + "raw/stdout/" + self.fileHash + "/"+"\n")
             for line in self.proc.stdout:
                 lu.log(urllib.request.urlopen(url="http://"+self.dataBase + "raw/stdout/" + self.fileHash + "/", data=json.dumps({"line":str(line)}).encode("UTF-8")).info())
