@@ -27,12 +27,19 @@ import lambdaUtils as lu
 os.chdir(filePath)
 
 # ==========================
+#   Global Variables
+# ==========================
+minionID=-1 # temporary mechanism # fix in beta to reduce tight coupling between classes
+
+# ==========================
 #   Main Function
 # ==========================
 def main():
     checkDependencies("unzip")
     # make a friendly minion to work for you
     myMinion = Minion()
+    global minionID
+    minionID = myMinion.ID 
     lu.log(myMinion)
     # start broadcasting his address
     while ( not myMinion.getPorts()[0][1] ):
@@ -134,7 +141,7 @@ class Executer:
                 lu.log("Could not find Makefile")
         # TEXT SCRIPT
         else:
-            command = "./" + os.path.basename(self.filePath)
+            command = "bash " + os.path.basename(self.filePath)
         self.execute(command)
         shutil.rmtree(self.folder)
     def execute(self, command):
@@ -143,14 +150,48 @@ class Executer:
         self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
         self.pollSubProc()
     def pollSubProc(self):
-        while self.proc.poll() == None: # apply line number 
-            lu.log(self.dataBase + "raw/stdout/" + self.fileHash + "/"+"\n")
-            for line in self.proc.stdout:
-                lu.log(urllib.request.urlopen(url="http://"+self.dataBase + "raw/stdout/" + self.fileHash + "/", data=json.dumps({"line":str(line)}).encode("UTF-8")).info())
-            for line in self.proc.stderr:
-                lu.log(urllib.request.urlopen(url="http://"+self.dataBase + "raw/stderr/" + self.fileHash + "/", data=json.dumps({"line":str(line)}).encode("UTF-8")).info())
-            time.sleep(1)
-
+        global minionID
+        stdout="http://"+self.dataBase + "stdout/" + self.fileHash + "/" + str(minionID) + "/" # elastic addr
+        stderr="http://"+self.dataBase + "stderr/" + self.fileHash + "/" + str(minionID) + "/" # elastic addr
+        stdIndex=1 # stdout index tracker
+        errIndex=1 # stderr index tracker
+        # init table
+        lu.log("Initializing Table : " + stdout)
+        data={int(0):""}
+        lu.log(urllib.request.urlopen(url=stdout, data=json.dumps(data).encode("UTF-8")).info())
+        lu.log(urllib.request.urlopen(url=stderr, data=json.dumps(data).encode("UTF-8")).info())
+        while self.proc.poll() == None: # While process is runnning 
+            stdLine=None
+            stdLine = self.proc.stdout.readline() # stdout
+            if stdLine:
+                locStdout=stdout+"_update"
+                lu.log("Writing to stdout : " + locStdout)
+                data={"doc": {int(stdIndex):str(stdLine) }}
+                lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info())
+                stdIndex += 1
+            errLine=None
+            errLine = self.proc.stderr.readline() # stderr
+            if errLine:
+                locStderr=stderr+"_update"
+                lu.log("Writing to stderr : " + locStderr)
+                data={"doc": {int(stdIndex):str(errLine) }}
+                lu.log(urllib.request.urlopen(url=locStderr, data=json.dumps(data).encode("UTF-8")).info())
+                errIndex += 1
+            if not stdLine and not errLine: # sleep if no output from either
+                time.sleep(1)
+		# get final output after proc ends
+        for line in self.proc.stdout: # stdout
+            locStdout=stdout+"_update"
+            lu.log("Writing to stdout : " + locStdout)
+            data={"doc": {int(stdIndex):str(line) }}
+            lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info())
+            stdIndex += 1
+        for line in self.proc.stderr: # stderr
+            locStderr=stderr+"_update"
+            lu.log("Writing to stderr : " + locStderr)
+            data={"doc": {int(stdIndex):str(line) }}
+            lu.log(urllib.request.urlopen(url=locStderr, data=json.dumps(data).encode("UTF-8")).info())
+            errIndex += 1
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
 
