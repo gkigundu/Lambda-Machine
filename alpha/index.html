@@ -79,6 +79,7 @@
         checkAPIsupport();
         getScriptListing();
         getNodeListing();
+        getOutputListing();
         updatePage("scripts");
         // loops
         setInterval(getNodeListing, 5000)
@@ -196,6 +197,58 @@
             return null
         }
     }
+    // // updates the output text view with the hashes of all run programs
+    // function getOutputListing(){
+    //     xhrGet("/codeScrolls/", function (xhr) {
+    //         var hierarchyTree = $('r2c1_scripts');
+    //         hierarchyTree.innerHTML = xhr.response;
+    //         var aList = [].slice.call(hierarchyTree.getElementsByTagName("a"));
+    //         if(aList.length > 0){
+    //             _("Found more then zero listings. Updating hierarchy view")
+    //             var newHierarchyTree = document.createElement("table");
+    //             for (i = 0; i < aList.length; i++) {
+    //                 var tr  = document.createElement("tr")
+    //                 var td1 = document.createElement("td");
+    //                 var td2 = document.createElement("td");
+    //                 var td3 = document.createElement("td");
+    //                 tr.appendChild(td1);
+    //                 tr.appendChild(td2);
+    //                 tr.appendChild(td3);
+    //                 newHierarchyTree.appendChild(tr)
+    //                 // create nodes
+    //                 var text = document.createElement("p");
+    //                 var view = document.createElement("img");
+    //                 var run  = document.createElement("img");
+    //                 // text node details
+    //                 let imgSize = 20;
+    //                 tr  .setAttribute("id", aList[i].innerHTML);
+    //                 text.setAttribute("style", "text-align:right;");
+    //                 view.setAttribute("style", "text-align : left;");
+    //                 view.setAttribute("src", "/res/view.png");
+    //                 run .setAttribute("src", "/res/run.png");
+    //                 run .setAttribute("width", imgSize);
+    //                 run .setAttribute("height", imgSize);
+    //                 view.setAttribute("width", imgSize);
+    //                 view.setAttribute("height", imgSize);
+    //                 run .setAttribute("onclick", "run        ('" + aList[i].innerHTML + "')");
+    //                 view.setAttribute("onclick", "contentView_script('" + aList[i].innerHTML + "')");
+    //                 text.innerHTML = aList[i].innerHTML;
+    //                 // append nodes
+    //                 td1.appendChild(view);
+    //                 td2.appendChild(run );
+    //                 td3.appendChild(text);
+    //             }
+    //             // _("Cleaning pre existing hierarchy tree")
+    //             while (hierarchyTree.firstChild) {
+    //                 hierarchyTree.removeChild(hierarchyTree.firstChild);
+    //             }
+    //             hierarchyTree.appendChild(newHierarchyTree);
+    //         }else{
+    //             hierarchyTree.innerHTML = "<p style='text-align:center'>Uploaded Files Will Appear Here.</p>"
+    //         }
+    //         _("Got new script listing");
+    //     });
+    // }
     // updates the heirarchy view with the scripts found in the python server's codescrolls directory
     function getScriptListing(){
         // _("Getting script listing");

@@ -122,6 +122,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
 
                 # send binary data to socket
                 lu.sendFile(data["FileLoc"],(masterAddr,int(lu.getPort("Master_programRec"))))
+                # self.send(data["Hash"])
                 self.setHeaders(200)
             else:
                 lu.log("Nothing to send to master")
