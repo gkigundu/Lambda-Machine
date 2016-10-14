@@ -68,6 +68,21 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                         return 1
             except:
                 lu.log("Could not get network table from Omega.")
+        elif (self.path == lu.paths["alpha_hashes"]): # node
+            requestURL='http://'+str(lu.getAddrOf("delta"))+':'+str(lu.getPort("delta"))+"/stdout/_search"
+            lu.log("Requesting " + requestURL)
+            msg=None
+            try:
+                with urllib.request.urlopen(requestURL) as response:
+                    self.setHeaders(200)
+                    try:
+                        msg = response.read().decode("UTF-8")
+                        self.wfile.write(msg.encode("UTF-8"))
+                    except:
+                        lu.error("Could not parse routing table")
+                        return 1
+            except:
+                lu.log("Could not stdout from delta.")
         elif os.path.isfile(filePath):
             self.setHeaders(200)
             self.writeDataToHandler(filePath)
@@ -129,6 +144,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
 
                 # send binary data to socket
                 lu.sendFile(data["FileLoc"],(masterAddr,int(lu.getPort("Master_programRec"))))
+                # self.send(data["Hash"])
                 self.setHeaders(200)
             else:
                 lu.log("Nothing to send to master")

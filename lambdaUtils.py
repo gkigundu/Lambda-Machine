@@ -50,6 +50,7 @@ paths["alpha_scripts"]          = "codeScrolls"         # GET
 paths["alpha_stdout"]           = "stdout"             # GET
 paths["alpha_stderr"]           = "stderr"             # GET
 paths["master_progTable"]       = "/progTable"          # GET
+paths["alpha_hashes"]           = "/hashes/"         # GET
 
 # ==========================
 #   Helper Functions
