@@ -52,6 +52,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("^/",os.getcwd()+"/",self.path)
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
+        pathSplit=[x for x in self.path.split("/") if x] # TODO : Restructure get using pathSplit
         if (self.path == lu.paths["alpha_nodeListing"]): # node
             requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.getPort("omega_tableReq"))+lu.paths["omega_Table"]
             lu.log("Requesting " + requestURL)
@@ -82,6 +83,12 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                         self.wfile.write(i.encode("UTF-8"))
                 else:
                     self.wfile.write("directory empty".encode("UTF-8"))
+        elif pathSplit[0] == lu.paths["alpha_stdout"]:
+            self.setHeaders(200)
+            print(pathSplit)
+        elif pathSplit[0] == lu.paths["alpha_stderr"]:
+            self.setHeaders(200)
+            print(pathSplit)
         elif not os.path.exists(filePath):
             self.setHeaders(404)
             string="File : '" + filePath + "' not found."

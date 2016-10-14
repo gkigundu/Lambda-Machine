@@ -47,7 +47,9 @@ paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET
 paths["alpha_postScript"]       = "/submitToMaster"     # GET
 paths["alpha_scripts"]          = "codeScrolls"         # GET
-paths["master_progTable"]       = "/progTable"         # GET
+paths["alpha_stdout"]           = "stdout"             # GET
+paths["alpha_stderr"]           = "stderr"             # GET
+paths["master_progTable"]       = "/progTable"          # GET
 
 # ==========================
 #   Helper Functions
