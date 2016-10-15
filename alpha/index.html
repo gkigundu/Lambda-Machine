@@ -8,6 +8,11 @@
   //  =====================
   //  	START Javascript
   //  =====================
+  // Globals
+  var nodeListingTable=null;
+  var selectedScript=null;
+  var selectedNode=null;
+
   // get elements
   function $(id){
     return document.getElementById(id)
@@ -120,7 +125,6 @@
     _("request for content view finished");
   }
   // node content view change
-  var selectedNode=null;
   function contentView_nodes(name){
     colorSelected($('r2c1_nodes'), $(name));
     selectedNode=name;
@@ -137,8 +141,6 @@
     return elem
   }
   // called when the play button is clicked. Opens the content view pannel for running the script. reaches out to Lambda-M
-  var nodeListingTable=null;
-  var selectedScript=null;
   function run(fileName){
     _("getting content view for running '" + fileName + "'");
     selectedScript=fileName;
@@ -194,12 +196,21 @@
     message_JSON.script=selectedScript;
     if(message_JSON.nodes.length > 0){
       xhrPost("/submitToMaster",JSON.stringify(message_JSON), function(xhr){
+        var hash = xhr.responseText;
           _("Hash of file : " + xhr.responseText)
+          genOutputTextBoxes(hash)
       });
     }
     else{
       _("No nodes specified.");
     }
+  }
+  // create output boxes for viewing script outputs
+  function genOutputTextBoxes(hash){
+    var conView = $("contentView_script")
+    var logs=[]
+
+    var DOM_submit=createAppend("button",conView, [["onclick", "submitJob()"]]);
   }
   // parse JSON with return value
   function parseJSON(string){
