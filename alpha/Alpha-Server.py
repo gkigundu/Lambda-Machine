@@ -86,16 +86,13 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                 else:
                     self.wfile.write("directory empty".encode("UTF-8"))
         # get database entries for user
-        elif pathSplit[0] == lu.paths["alpha_stdout"]:
+        elif pathSplit[0] == lu.paths["alpha_stdout"] or pathSplit[0] == lu.paths["alpha_stderr"]:
             msg = lu.deltaGetData(pathSplit)
             if(not msg):
                 self.setHeaders(500)
                 return
             self.setHeaders(200)
             self.wfile.write(msg.encode("UTF-8"))
-        elif pathSplit[0] == lu.paths["alpha_stderr"]:
-            self.setHeaders(200)
-            print(pathSplit)
         # no file could be found
         elif not os.path.exists(filePath):
             self.setHeaders(404)

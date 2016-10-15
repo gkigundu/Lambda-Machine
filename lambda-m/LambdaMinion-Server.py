@@ -171,7 +171,7 @@ class Executer:
                 stdIndex += 1
             errLine=None
             errLine = self.proc.stderr.readline() # stderr
-            if errLine:
+            if errLine
                 locStderr=stderr+"_update"
                 lu.log("Writing to stderr : " + locStderr)
                 data={"doc": {int(stdIndex):str(errLine) }}
