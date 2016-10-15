@@ -47,10 +47,9 @@ paths["master_postScript"]      = "/postScript"         # POST
 paths["alpha_nodeListing"]      = "/nodes"              # GET
 paths["alpha_postScript"]       = "/submitToMaster"     # GET
 paths["alpha_scripts"]          = "codeScrolls"         # GET
-paths["alpha_stdout"]           = "stdout"             # GET
-paths["alpha_stderr"]           = "stderr"             # GET
+paths["alpha_stdout"]           = "stdout"              # GET
+paths["alpha_stderr"]           = "stderr"              # GET
 paths["master_progTable"]       = "/progTable"          # GET
-paths["alpha_hashes"]           = "/hashes/"         # GET
 
 # ==========================
 #   Helper Functions
@@ -140,6 +139,33 @@ def getHash(fileLoc):
     with open(fileLoc, 'rb') as f:
         m.update(f.read())
     return m.hexdigest()
+
+# ==========================
+#  Database Communication
+# ==========================
+def deltaGetData(location):
+    # location = list()
+    print("/".join(location))
+    requestURL='http://'+str(getAddrOf("delta"))+':'+str(getPort("delta"))+"/" + "/".join(location)
+    log("Requesting " + requestURL)
+    msg=None
+    try:
+        with urllib.request.urlopen(requestURL) as response:
+            msg = response.read().decode("UTF-8")
+            return msg
+    except:
+        log("Could get date from delta")
+        return None
+# def deltaPostData(message, *location): # TODO
+#     requestURL='http://'+str(lu.getAddrOf("delta"))+':'+str(lu.getPort("delta"))+"/" + "/".join(location)
+#     lu.log("Requesting " + requestURL)
+#     msg=None
+#     try:
+#         with urllib.request.urlopen(requestURL) as response:
+#             # TODO : Implement Here
+#     except:
+#         lu.log("Could get date from delta.")
+#         return None
 # ==========================
 #  Node Discovery
 # ==========================

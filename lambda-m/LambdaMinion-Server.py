@@ -39,7 +39,7 @@ def main():
     # make a friendly minion to work for you
     myMinion = Minion()
     global minionID
-    minionID = myMinion.ID 
+    minionID = myMinion.ID
     lu.log(myMinion)
     # start broadcasting his address
     while ( not myMinion.getPorts()[0][1] ):
@@ -160,7 +160,7 @@ class Executer:
         data={int(0):""}
         lu.log(urllib.request.urlopen(url=stdout, data=json.dumps(data).encode("UTF-8")).info())
         lu.log(urllib.request.urlopen(url=stderr, data=json.dumps(data).encode("UTF-8")).info())
-        while self.proc.poll() == None: # While process is runnning 
+        while self.proc.poll() == None: # While process is runnning
             stdLine=None
             stdLine = self.proc.stdout.readline() # stdout
             if stdLine:
@@ -184,7 +184,7 @@ class Executer:
             locStdout=stdout+"_update"
             lu.log("Writing to stdout : " + locStdout)
             data={"doc": {int(stdIndex):str(line) }}
-            lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info())
+            lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info()) # TODO convert to lu.deltaPostData()
             stdIndex += 1
         for line in self.proc.stderr: # stderr
             locStderr=stderr+"_update"

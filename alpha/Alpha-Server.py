@@ -36,7 +36,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header(b'Content-type', 'text/html')
         self.end_headers()
-    def writeDataToHandler(self, readFile):
+    def writeFileToHandler(self, readFile):
         f = open(readFile, 'rb')
         bufferSize=50
         try:
@@ -53,6 +53,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
         filePath=re.sub("%20"," ",filePath)
         filePath=re.sub("/+","/",filePath)
         pathSplit=[x for x in self.path.split("/") if x] # TODO : Restructure get using pathSplit
+        # Get listing of nodes from omega. Returns JSON
         if (self.path == lu.paths["alpha_nodeListing"]): # node
             requestURL='http://'+str(lu.getOmegaAddr())+':'+str(lu.getPort("omega_tableReq"))+lu.paths["omega_Table"]
             lu.log("Requesting " + requestURL)
@@ -68,29 +69,15 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                         return 1
             except:
                 lu.log("Could not get network table from Omega.")
-        elif (self.path == lu.paths["alpha_hashes"]): # node
-            requestURL='http://'+str(lu.getAddrOf("delta"))+':'+str(lu.getPort("delta"))+"/stdout/_search"
-            lu.log("Requesting " + requestURL)
-            msg=None
-            try:
-                with urllib.request.urlopen(requestURL) as response:
-                    self.setHeaders(200)
-                    try:
-                        msg = response.read().decode("UTF-8")
-                        self.wfile.write(msg.encode("UTF-8"))
-                    except:
-                        lu.error("Could not parse routing table")
-                        return 1
-            except:
-                lu.log("Could not stdout from delta.")
+        # is file or directory reference
         elif os.path.isfile(filePath):
             self.setHeaders(200)
-            self.writeDataToHandler(filePath)
+            self.writeFileToHandler(filePath)
         elif os.path.isdir(filePath):
             index=os.path.join(filePath,"index.html")
             if os.path.isfile(index):
                 self.setHeaders(200)
-                self.writeDataToHandler(index)
+                self.writeFileToHandler(index)
             else:
                 if(len(os.listdir(filePath))):
                     for i in os.listdir(filePath):
@@ -98,12 +85,18 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                         self.wfile.write(i.encode("UTF-8"))
                 else:
                     self.wfile.write("directory empty".encode("UTF-8"))
+        # get database entries for user
         elif pathSplit[0] == lu.paths["alpha_stdout"]:
+            msg = lu.deltaGetData(pathSplit)
+            if(not msg):
+                self.setHeaders(500)
+                return
             self.setHeaders(200)
-            print(pathSplit)
+            self.wfile.write(msg.encode("UTF-8"))
         elif pathSplit[0] == lu.paths["alpha_stderr"]:
             self.setHeaders(200)
             print(pathSplit)
+        # no file could be found
         elif not os.path.exists(filePath):
             self.setHeaders(404)
             string="File : '" + filePath + "' not found."
@@ -146,8 +139,10 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
                 lu.sendFile(data["FileLoc"],(masterAddr,int(lu.getPort("Master_programRec"))))
                 # self.send(data["Hash"])
                 self.setHeaders(200)
+                self.wfile.write(data["Hash"].encode("UTF-8"))
             else:
                 lu.log("Nothing to send to master")
+                self.setHeaders(500)
         else:
             lu.log("Could not post " + self.path)
 
