@@ -41,8 +41,8 @@
         func(xhr);
       }
     }
-    xhr.onerror = function (e) {
-      console.error(xhr.statusText);
+    xhr.onerror = function () {
+      _(xhr.statusText);
     };
     xhr.send(null);
   }
@@ -170,6 +170,7 @@
           var td2=createAppend("td",tr);
           var td3=createAppend("td",tr);
           var box=createAppend("input",td1, [["type","checkbox"],["id","check_"+elem.name]]);
+          box.checked = true;
           var p=createAppend("p",td2);
           p.innerHTML=elem.name
           var p=createAppend("p",td3);
@@ -192,7 +193,7 @@
         message_JSON.nodes.push(elem.getElementsByTagName("td")[1].getElementsByTagName("p")[0].innerHTML);
       }
     });
-    message_JSON.script=[];
+    // message_JSON.script=[];
     message_JSON.script=selectedScript;
     if(message_JSON.nodes.length > 0){
       xhrPost("/submitToMaster",JSON.stringify(message_JSON), function(xhr){
@@ -207,10 +208,40 @@
   }
   // create output boxes for viewing script outputs
   function genOutputTextBoxes(hash){
+    var curScript = selectedScript
     var conView = $("contentView_script")
-    var logs=[]
-
-    var DOM_submit=createAppend("button",conView, [["onclick", "submitJob()"]]);
+    var logsBoxes=[]
+    var els=Array.prototype.slice.call(nodeListingTable.getElementsByTagName("tr")).slice(1);
+    els.forEach(function( elem){
+      if(elem.getElementsByTagName("td")[0].getElementsByTagName("input")[0].checked){
+        var nodeName = elem.getElementsByTagName("td")[1].getElementsByTagName("p")[0].innerHTML
+        var nodeNum = nodeName.replace(/.*\./, "");
+        // var DOM_table=createAppend("div",conView, [["float","left"],["width","30%"],["height","30%"]]);
+        createAppend("p",conView).innerHTML=nodeName;
+        var DOM_Table=createAppend("table",conView);
+        var tr=createAppend("tr",DOM_Table);
+        createAppend("td",tr).innerHTML="stdout";
+        createAppend("td",tr).innerHTML="stderr";
+        var tr=createAppend("tr",DOM_Table);
+        var td1=createAppend("td",tr);
+        var td2=createAppend("td",tr);
+        var DOM_logBoxStdout=createAppend("textarea",td1,[["disabled"]]); // [["rows", "4"],["cols","50"]]
+        var DOM_logBoxStderr=createAppend("textarea",td2,[["disabled"]]);
+        var outClosure = (function(){
+          line = 1
+          return function(func){
+            getDeltaEntry("stdout", hash, nodeNum, line, function(data){
+              data = parseJSON(data)
+              if(data[line]){
+                DOM_logBoxStdout.value+=data[line]
+                line++
+              }
+            })
+          }
+        })()
+        setInterval(outClosure, 2000)
+      }
+    });
   }
   // parse JSON with return value
   function parseJSON(string){
@@ -226,10 +257,11 @@
     // getDeltaEntry("stdout","404a8d78e875a313246522eb2eed2c37","1","11", function(msg){
     //   _(msg)
     // })
-    urlArray=["/", stdStream, "/", hash, "/", minion, "/", "_source?_source=" ,line]
+    urlArray=["/", stdStream, "/", hash, "/", minion, "/", "_source?_source_include=" ,line]
     urlStr = urlArray.join([separator = ''])
     _("Getting " + urlStr)
     xhrGet(urlStr, function (xhr) {
+      _(xhr.response)
       func(xhr.response);
     });
   }
