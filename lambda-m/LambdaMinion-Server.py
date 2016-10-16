@@ -151,49 +151,47 @@ class Executer:
         self.pollSubProc()
     def pollSubProc(self):
         global minionID
-        stdout="http://"+self.dataBase + "stdout/" + self.fileHash + "/" + str(minionID) + "/" # elastic addr
-        stderr="http://"+self.dataBase + "stderr/" + self.fileHash + "/" + str(minionID) + "/" # elastic addr
+        stdout=["stdout", self.fileHash, str(minionID)] # location array passed to deltaPostData
+        stderr=["stderr", self.fileHash, str(minionID)]
+        metaInfo=["meta", self.fileHash, str(minionID)] # describes lines of output
+        stdoutUpdate=["stdout", self.fileHash, str(minionID), "_update"]
+        stderrUpdate=["stderr", self.fileHash, str(minionID), "_update"]
         stdIndex=1 # stdout index tracker
         errIndex=1 # stderr index tracker
         # init table
-        lu.log("Initializing Table : " + stdout)
         data={int(0):""}
-        lu.log(urllib.request.urlopen(url=stdout, data=json.dumps(data).encode("UTF-8")).info())
-        lu.log(urllib.request.urlopen(url=stderr, data=json.dumps(data).encode("UTF-8")).info())
+        lu.deltaPostData(data, stdout)
+        lu.deltaPostData(data, stderr)
+        lu.deltaPostData(data, metaInfo)
         while self.proc.poll() == None: # While process is runnning
             stdLine=None
             stdLine = self.proc.stdout.readline() # stdout
             if stdLine:
-                locStdout=stdout+"_update"
-                lu.log("Writing to stdout : " + locStdout)
                 data={"doc": {int(stdIndex):str(stdLine) }}
-                lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info())
+                lu.deltaPostData(data, stdoutUpdate)
                 stdIndex += 1
             errLine=None
             errLine = self.proc.stderr.readline() # stderr
-            if errLine
-                locStderr=stderr+"_update"
-                lu.log("Writing to stderr : " + locStderr)
+            if errLine:
+                stderrUpdate=stderr+"_update"
                 data={"doc": {int(stdIndex):str(errLine) }}
-                lu.log(urllib.request.urlopen(url=locStderr, data=json.dumps(data).encode("UTF-8")).info())
+                lu.deltaPostData(data, stderrUpdate)
                 errIndex += 1
             if not stdLine and not errLine: # sleep if no output from either
                 time.sleep(1)
 		# get final output after proc ends
         for line in self.proc.stdout: # stdout
-            locStdout=stdout+"_update"
-            lu.log("Writing to stdout : " + locStdout)
             data={"doc": {int(stdIndex):str(line) }}
-            lu.log(urllib.request.urlopen(url=locStdout, data=json.dumps(data).encode("UTF-8")).info()) # TODO convert to lu.deltaPostData()
+            lu.deltaPostData(data, stdoutUpdate)
             stdIndex += 1
         for line in self.proc.stderr: # stderr
-            locStderr=stderr+"_update"
-            lu.log("Writing to stderr : " + locStderr)
             data={"doc": {int(stdIndex):str(line) }}
-            lu.log(urllib.request.urlopen(url=locStderr, data=json.dumps(data).encode("UTF-8")).info())
+            lu.deltaPostData(data, stderrUpdate)
             errIndex += 1
+        # update status
         self.status=self.proc.poll()
         lu.log("Executer Finished with status : " + str(self.status))
-
-
+        # Update Meta Info
+        data={"std":stdIndex,"err":errIndex,"code":self.status}
+        lu.deltaPostData(data, metaInfo)
 main()

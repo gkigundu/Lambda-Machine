@@ -67,10 +67,13 @@ def getCallerFile():
     except:
         return "---"
 def log(string):
-    sys.stdout.write("<log> " + getCallerFile() + " : " + str(string).strip() + "\n")
+    sys.stdout.write("<LOG> " + getCallerFile() + " : " + str(string).strip() + "\n")
+    sys.stdout.flush()
+def logError(string):
+    sys.stdout.write("<ERR> " + getCallerFile() + " : " + str(string).strip() + "\n")
     sys.stdout.flush()
 def error(string, *e):
-    sys.stderr.write("<ERROR> " + getCallerFile() + " : " + str(string) + "\n")
+    sys.stderr.write("<FATAL ERROR> " + getCallerFile() + " : " + str(string) + "\n")
     if len(e) > 0:
         sys.stderr.write("============================\n")
         sys.stderr.write(str(e))
@@ -146,26 +149,34 @@ def getHash(fileLoc):
 def deltaGetData(location):
     # location = list()
     print("/".join(location))
-    requestURL='http://'+str(getAddrOf("delta"))+':'+str(getPort("delta"))+"/" + "/".join(location)
-    log("Requesting " + requestURL)
-    msg=None
-    try:
-        with urllib.request.urlopen(requestURL) as response:
-            msg = response.read().decode("UTF-8")
-            return msg
-    except:
-        log("Could get date from delta")
-        return None
-# def deltaPostData(message, *location): # TODO
-#     requestURL='http://'+str(lu.getAddrOf("delta"))+':'+str(lu.getPort("delta"))+"/" + "/".join(location)
-#     lu.log("Requesting " + requestURL)
-#     msg=None
-#     try:
-#         with urllib.request.urlopen(requestURL) as response:
-#             # TODO : Implement Here
-#     except:
-#         lu.log("Could get date from delta.")
-#         return None
+    if not getAddrOf("delta"):
+        logError("Could not get Delta Address")
+    if not getPort("delta"):
+        logError("Could not get Delta Port")
+    else:
+        requestURL='http://'+str(getAddrOf("delta"))+':'+str(getPort("delta"))+"/" + "/".join(location)
+        log("Requesting " + requestURL)
+        msg=None
+        try:
+            with urllib.request.urlopen(requestURL) as response:
+                msg = response.read().decode("UTF-8")
+                return msg
+        except:
+            log("Could get date from delta")
+            return None
+def deltaPostData(message, location):
+    if not getAddrOf("delta"):
+        logError("Could not get Delta Address")
+    if not getPort("delta"):
+        logError("Could not get Delta Port")
+    else:
+        requestURL='http://'+str(getAddrOf("delta"))+':'+str(getPort("delta"))+"/" + "/".join(location)
+        log("Requesting " + requestURL)
+        try:
+            urllib.request.urlopen(url=requestURL, data=json.dumps(message).encode("UTF-8")).info()
+        except:
+            logError("Could not post date to delta.")
+            return None
 # ==========================
 #  Node Discovery
 # ==========================
@@ -185,7 +196,7 @@ def getPort(portName):
             return _ports[portName]
         except:
             pass
-    log("Could not get port : " + portName)
+    logError("Could not get port : " + portName)
     return None
 def getNetworkTable():
     msg=None
@@ -195,7 +206,7 @@ def getNetworkTable():
     try:
         msg = json.loads(msg)
     except:
-        error("Could not parse routing table")
+        logError("Could not parse routing table")
         return None
     return msg
 def getAddr():
@@ -218,12 +229,15 @@ def getAddr():
             subNet="127.0.0.1/32"
             addr="127.0.0.1"
         except:
-            error("Could not get address.")
+            logError("Could not get address.")
     return addr
 def getBroadcast():
     return str(ipaddress.ip_network(subNet).broadcast_address)
 def getAddrOf(entityStr):
-    return getNodeByName(entityStr)["addr"]
+    node = getNodeByName(entityStr)
+    if(node):
+        return node["addr"]
+    return None
 def getNodeByName(entityStr):
     # get the address of the entity specified
     # returns JASON Dump
@@ -234,7 +248,7 @@ def getNodeByName(entityStr):
     try:
         msg = json.loads(msg)
     except:
-        error("Could not parse routing table")
+        logError("Could not parse routing table")
         return 1
     foundAddr=None
     for entity in msg:
@@ -260,7 +274,7 @@ def getOmegaAddr():
         except socket.timeout :
             sock.close()
             time.sleep(.1)
-            log("Could not get Omega Server Address. Retrying")
+            logError("Could not get Omega Server Address. Retrying")
     sock.close()
     omegaAddr=data.decode("UTF-8").split(" ")[0]
     _ports["omega_tablereq"]=data.decode("UTF-8").split(" ")[1]
