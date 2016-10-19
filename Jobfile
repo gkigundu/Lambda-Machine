@@ -16,7 +16,7 @@ kill:
 start:
     # for developers
     job -y kill || echo -n ""
-    lines='''
+    #lines='''
     ./alpha/Alpha-Server.py &
     ./omega/Omega-Server.py &
     ./lambda-M/LambdaMaster-Server.py &
@@ -24,11 +24,11 @@ start:
     ./lambda-m/LambdaMinion-Server.py &
     ./lambda-m/LambdaMinion-Server.py &
     ./lambda-m/LambdaMinion-Server.py &
-    '''
+    #'''
 
-    echo "$lines" | while read i ; do
-      gnome-terminal -e "$i"
-    done
+    #echo "$lines" | while read i ; do
+    #    gnome-terminal -e "$i"
+    #done
 mpad:
     mousepad ./alpha/Alpha-Server.py ./lambdaUtils.py  ./omega/Omega-Server.py ./lambda-M/LambdaMaster-Server.py     ./delta/Delta-Database.py  ./lambda-m/LambdaMinion-Server.py &
 mergeWithMaster:
