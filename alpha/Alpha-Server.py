@@ -107,7 +107,7 @@ class HTTP_webpageHandler(http.server.BaseHTTPRequestHandler):
         pathroot=self.path.split("/")
         while "" in pathroot:
             pathroot.remove("")
-        if(pathroot[0] == lu.paths["alpha_scripts"]): ## TEST : file upload
+        if(pathroot[0] == lu.paths["alpha_scripts"]): # TEST THIS : This may be broken : file upload
             lu.log("Uploading Script - " + self.path)
             fp=self.rfile
             filePath=re.sub("^/",os.getcwd()+"/",self.path)

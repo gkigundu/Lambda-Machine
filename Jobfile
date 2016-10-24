@@ -10,7 +10,7 @@ push:
 viewChanges:
     git log -p
 wordCountPy:
-    find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | wc -l
+    find -type f | grep ".py\|.js\|.css" | while read x ; do file "$x" ; done | grep ASCII | sed 's/:.*//g'  | while read x ; do cat "$x" ; done | grep -v "^$" | sort | uniq | wc -l
 kill:
     kill -9 $(ps -ef | grep "alpha\|omega\|lambda\|delta\|elastic" | grep "python\|elasticsearch" -i | grep -v "grep" | awk '{print $2}')
 start:

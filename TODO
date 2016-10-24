@@ -34,9 +34,9 @@
 ==================
 	Alpha
 ==================
-[] lambda-m node tab
+[x] lambda-m node tab
 [] debug tab
-[] script folders
+[] allow script folders
 [x] async xhr calls
 
 ==================
@@ -56,7 +56,7 @@
 [x] receive scripts
 [x] execute functionality
 [] status log
-[] ship data to database
+[x] ship data to database
 [] terminate find Makefile loop when file found
 
 ==================

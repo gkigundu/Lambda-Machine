@@ -173,8 +173,7 @@ class Executer:
             errLine=None
             errLine = self.proc.stderr.readline() # stderr
             if errLine:
-                stderrUpdate=stderr+"_update"
-                data={"doc": {int(stdIndex):str(errLine) }}
+                data={"doc": {int(errIndex):str(errLine) }}
                 lu.deltaPostData(data, stderrUpdate)
                 errIndex += 1
             if not stdLine and not errLine: # sleep if no output from either
@@ -185,7 +184,7 @@ class Executer:
             lu.deltaPostData(data, stdoutUpdate)
             stdIndex += 1
         for line in self.proc.stderr: # stderr
-            data={"doc": {int(stdIndex):str(line) }}
+            data={"doc": {int(errIndex):str(line) }}
             lu.deltaPostData(data, stderrUpdate)
             errIndex += 1
         # update status
