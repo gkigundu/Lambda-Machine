@@ -1,7 +1,7 @@
 import sys
 import socket
 import ipaddress
-import threading, subprocess
+import threading, subprocess # TODO: remove threading
 import queue
 import urllib.request
 import http.client
