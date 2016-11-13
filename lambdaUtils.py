@@ -66,9 +66,13 @@ def getCallerFile():
                         return j
     except:
         return "---"
-def log(string):
-    sys.stdout.write("<LOG> " + getCallerFile() + " : " + str(string).strip() + "\n")
-    sys.stdout.flush()
+def log(string, *more):
+	string = "<LOG> " + getCallerFile() + " : " + str(string).strip()
+	for i in more:
+		string += " " + str(i)
+	string += "\n"
+	sys.stdout.write(string)
+	sys.stdout.flush()
 def logError(string):
     sys.stdout.write("<ERR> " + getCallerFile() + " : " + str(string).strip() + "\n")
     sys.stdout.flush()
@@ -261,13 +265,14 @@ def getOmegaAddr():
         return omegaAddr
     addr = getAddr()
     omegaBroadcastReceived = False
-    log("Getting Omega Address.")
     while not omegaBroadcastReceived:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.settimeout(10)
-            sock.bind((getBroadcast(), getPort("OmegaBroadcast"))) # UDP
+            bindLoc = (getBroadcast(), getPort("OmegaBroadcast"))
+            sock.bind(bindLoc) # UDP
+            log("Getting Omega Address from ", bindLoc)
             data, a = sock.recvfrom(1024)
             if(len(data) > 0):
                 omegaBroadcastReceived = True
