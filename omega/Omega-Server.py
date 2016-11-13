@@ -101,7 +101,7 @@ class OmegaNodeDiscovery(lu.nodeDiscovery):
         broadcastThread = threading.Thread(target=self._broadcast, args = (lu.getPort("OmegaBroadcast"),))
         broadcastThread.start()
     def _broadcast(self, port):
-          # continually sends out ping messages with the clients ip addr and name. UDP
+          # continually sends out ping messages with omega ip addr and name. UDP
         msg=str(self.addr)+" "+str(self.jsonInfo["omega_tablereq"])
         lu.log("Broadcasting omega address on : " + str(lu.getPort("OmegaBroadcast")) )
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
