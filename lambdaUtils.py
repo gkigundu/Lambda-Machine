@@ -263,13 +263,14 @@ def getOmegaAddr():
     global omegaAddr
     if omegaAddr:
         return omegaAddr
+    addr = getAddr()
     omegaBroadcastReceived = False
     while not omegaBroadcastReceived:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.settimeout(10)
-            bindLoc = (getAddr(), getPort("OmegaBroadcast"))
+            bindLoc = (getBroadcast(), getPort("OmegaBroadcast"))
             sock.bind(bindLoc) # UDP
             log("Getting Omega Address from ", bindLoc)
             data, a = sock.recvfrom(1024)
