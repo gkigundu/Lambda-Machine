@@ -2,18 +2,22 @@ Copyright (C) 2016 Derek Maier
 
 === Project Info
 Initiated : 6  July 2016
-Revised   : 15 Oct  2016
-Version   : 0.18 (Alpha)
+Revised   : 20 Nov  2016
+Version   : 0.2 (Alpha)
 
 Production Team        : Monolith
-Project Title          : Lambda Machine
+Project Title          : (λ) Machine
+                       : Lambda-Machine
+
+Unique lines of source code : 1514
 
 === Team
 Development            : Derek Maier
 Documentation          : David Nelson
                        : Weston Ford
-Project Layout:
-Tinyurl.com/Lambda-Machine
+
+=== Documentation:
+https://goo.gl/rfh3je
 
 === License
 GNU GENERAL PUBLIC LICENSE
