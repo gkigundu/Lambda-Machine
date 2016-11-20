@@ -2,7 +2,7 @@
 
 index=0
 while [ $index -lt 40 ] ; do
-	uptime | tr '\n' '|'
-        index=$(($index+1))
+	uptime
+  index=$(($index+1))
 	sleep 1
 done
