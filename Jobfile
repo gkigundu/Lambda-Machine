@@ -21,9 +21,7 @@ start:
     ./omega/Omega-Server.py &
     ./lambda-M/LambdaMaster-Server.py &
     ./delta/Delta-Database.py &
-    ./lambda-m/LambdaMinion-Server.py &
-    ./lambda-m/LambdaMinion-Server.py &
-    ./lambda-m/LambdaMinion-Server.py &
+    ./lambda-m/LambdaMinion-Server.py &s
     #'''
 
     #echo "$lines" | while read i ; do
