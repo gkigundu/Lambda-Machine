@@ -82,7 +82,7 @@ function run(fileName){
 }
 // jobs for minions
 function submitJob(){
-  _("Prepairing to submit job.");
+  _("Preparing to submit job.");
   message_JSON={}
   message_JSON.nodes=[];
   var els=Array.prototype.slice.call(nodeListingTable.getElementsByTagName("tr")).slice(1);

@@ -3,7 +3,7 @@
 	Global
 ==================
 [x] make all possible ports dynamic
-[] convert neccesary threads to multiprocessing
+[] convert necessary threads to multiprocessing
 [] document each class
 [] document each function
 [] document each global variable

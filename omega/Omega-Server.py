@@ -31,7 +31,7 @@ class networkTable():
     def __init__(self):
         self.networkTable=[]
     def getMinionNumber(self):
-        # returns nex available minion number
+        # returns next available minion number
         self.minionNumber=self.minionNumber+1
         return self.minionNumber
     def updateEntry(self, entry):
@@ -43,8 +43,8 @@ class networkTable():
         entry["epoch"]=int(calendar.timegm(time.gmtime()))
         for i in self.networkTable:
             if(i["name"] == entry["name"]):
-                self.networkTable.remove(i) # TODO : optomize
-        self.networkTable.append(entry) # append to tabe if entity does not exist
+                self.networkTable.remove(i) # TODO : optimize
+        self.networkTable.append(entry) # append to table if entity does not exist
         return 0
     def getTable(self):
         return json.dumps(self.networkTable)
@@ -63,7 +63,7 @@ class tableRequest():
     def _threadServe(self, httpd):
         httpd.serve_forever()
 class tableRequestHandler(http.server.BaseHTTPRequestHandler):
-    properPath=str([lu.paths[x] for x in [m.group(0) for l in lu.paths for m in [re.compile("^omega_.*").search(l)] if m]] ) # perfectly conveluded. Gets list of paths from lu.paths based on regex
+    properPath=str([lu.paths[x] for x in [m.group(0) for l in lu.paths for m in [re.compile("^omega_.*").search(l)] if m]] ) # perfectly convoluted. Gets list of paths from lu.paths based on regex
     def setHeaders(self, code):
         self.send_response(code)
         self.send_header(b'Content-type', 'text/html')

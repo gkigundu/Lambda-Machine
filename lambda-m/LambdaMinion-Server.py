@@ -63,7 +63,7 @@ class Minion():
         return (("minion_scriptRec", self.TCP_ScriptListener.getListenPort()),)
 class MinionTCP_Handler(socketserver.BaseRequestHandler):   # handler to deposit script
     def handle(self):
-        lu.log("Receiveing binary program.")
+        lu.log("Receiving binary program.")
         try:
             folder = tempfile.mkdtemp()
             fp = open(tempfile.mkstemp(dir=folder)[1], 'wb')
@@ -113,7 +113,7 @@ class Executer:
     fileHash=None
     status=None
     # 0  : Executing
-    # 1  : Completed Sucessfully
+    # 1  : Completed Successfully
     # -1 : invalid file
     # -2 : No makefile
     # -3 : unzip not installed on node
@@ -145,7 +145,7 @@ class Executer:
         self.execute(command)
         shutil.rmtree(self.folder)
     def execute(self, command):
-        lu.log("Exicuting : " + command)
+        lu.log("Executing : " + command)
         self.status=0
         self.proc = subP.Popen(shlex.split(command), cwd=os.path.dirname(self.filePath), universal_newlines=True, stdout=subP.PIPE, stderr=subP.PIPE)
         self.pollSubProc()
@@ -163,7 +163,7 @@ class Executer:
         lu.deltaPostData(data, stdout)
         lu.deltaPostData(data, stderr)
         lu.deltaPostData(data, metaInfo)
-        while self.proc.poll() == None: # While process is runnning
+        while self.proc.poll() == None: # While process is running
             stdLine=None
             stdLine = self.proc.stdout.readline() # stdout
             if stdLine:
