@@ -12,8 +12,8 @@ Project Title          : (λ) Machine
 Unique lines of source code : 1450
 
 === Team
-Development            : Derek Maier
-                       : Weston Ford
+Lead Development       : Derek Maier
+Development            : Weston Ford
 Documentation          : David Nelson
 
 === Documentation
@@ -24,6 +24,15 @@ https://goo.gl/TJWzmH
 
 === Poster
 https://goo.gl/jS2oVF
+
+=== Docker Build Instructions
+sudo docker run -i -t  ubuntu /bin/bash
+apt-get update
+apt-get install -y git python3 unzip make nano
+cd $HOME
+git clone https://github.com/XDerekMaierX/Lambda-Machine.git
+cd Lambda-Machine/
+./<moduleDir>/<module> # ex. :
 
 === License
 GNU GENERAL PUBLIC LICENSE
@@ -41,11 +50,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-=== Docker Build
-sudo docker run -i -t  ubuntu /bin/bash
-apt-get update
-apt-get install -y git python3 unzip
-cd $HOME
-git clone https://github.com/XDerekMaierX/Lambda-Machine.git
-cd Lambda-Machine/
