@@ -13,11 +13,15 @@ import ast
 import hashlib
 import socketserver
 
+# This source file is shared amongst each of the modules. It includes memorization techniques to reduce
+# function execution overhead.
+
 # ==========================
 #   Global Variables
 # ==========================
-# subNet="127.0.0.1/32"
-subNet="192.168.1.0/24"
+# subNet="127.0.0.1/32"   # IPv4 localhost
+# subNet="192.168.1.0/24" # IPv4 private network
+subNet="172.17.0.3/16"    # IPv4 Docker
 
 # ==========================
 #   Global Ports
@@ -25,21 +29,21 @@ subNet="192.168.1.0/24"
 
 _ports = {}
 _ports["alpha"]              = 26000 # HTTP   # HTTP Website frontend
-_ports["omega_tableReq"]     = None # HTTP   # Network Table and Minion ID requests
-_ports["delta"]              = 9200 # TCP    # Elastic Database Access Point
-_ports["Master_programRec"]  = None # TCP   # push program for distribution
-_ports["Master_JSONpost"]    = None # TCP   # push program for distribution
+_ports["omega_tableReq"]     = None # HTTP    # Network Table and Minion ID requests
+_ports["delta"]              = 9200 # TCP     # Elastic Database Access Point
+_ports["Master_programRec"]  = None # TCP     # push program for distribution
+_ports["Master_JSONpost"]    = None # TCP     # push program for distribution
 # _ports["minion_scriptRec"]   = None # TCP   #
 
 # used for host discovery
 _ports["OmegaListen"]       = 26101 # UDP    # Receives table entries
 _ports["OmegaBroadcast"]    = 26102 # UDP    # sends omega server address to subnet
 
-_ports=dict((k.lower(), v) for k,v in _ports.items())
+_ports=dict((k.lower(), v) for k,v in _ports.items()) # normalize dictonary format
 # ==========================
 #   Global Paths
 # ==========================
-paths = {}
+paths = {} # HTTP paths
 paths["omega_Table"]            = "/table"              # GET
 paths["omega_MinionTable"]      = "/lambdaMinionNumber" # GET # change this to miion mumber
 paths["master_ClusterStat"]     = "/clusterStatus"      # GET & POST
@@ -108,15 +112,17 @@ class TCP_BackgroundProcess:
 # ==========================
 #   Program Distribution
 # ==========================
-## Binary
-def sendMsg( msg, dest): # sends message as data
+# TCP Socket
+def sendMsg( msg, dest):
+    # sends message using TCP socket
     msg=str(msg)
     print("sending : " + msg + "\nto : " + str(dest))
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(dest)
     sock.sendto(msg, dest)
     sock.close()
-def sendFile( fileLoc, dest): # sends file as data
+def sendFile( fileLoc, dest):
+    # sending file using TCP socket
     f = open(fileLoc, "rb")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(dest)
@@ -151,6 +157,7 @@ def getHash(fileLoc):
 #  Database Communication
 # ==========================
 def deltaGetData(location):
+    # get data from Delta Database (elastic search)
     # location = list()
     print("/".join(location))
     if not getAddrOf("delta"):
@@ -186,6 +193,10 @@ def deltaPostData(message, location):
 # ==========================
 omegaAddr=None
 def getPort(portName):
+    # port Discovery. If the port number exists in in the _ports dictonary, it is returned.
+    # If the port number does not currently exist in the _ports dictonary a table request
+    # is sent to the Omega. The table is parsed and the port number is extracted and memoized
+    # for future reference.
     portName=portName.lower()
     global _ports
     table=None
@@ -193,7 +204,7 @@ def getPort(portName):
     if(_ports[portName]):
         return _ports[portName]
     log("Getting Port over network : " + portName)
-    table=getNetworkTable()
+    table=getNetworkTable() # get table from Omega
     for i in table:
         try:
             _ports[portName] = i[portName]
@@ -203,6 +214,7 @@ def getPort(portName):
     logError("Could not get port : " + portName)
     return None
 def getNetworkTable():
+    # get network table from Omega
     msg=None
     requestURL='http://'+str(getOmegaAddr())+':'+str(getPort("omega_tableReq"))+paths["omega_Table"]
     with urllib.request.urlopen(requestURL) as response:
@@ -214,6 +226,7 @@ def getNetworkTable():
         return None
     return msg
 def getAddr():
+    # get the IP address of the executing module
     global addr
     global subNet
     if addr:
@@ -260,12 +273,13 @@ def getNodeByName(entityStr):
             foundAddr=entity
     return foundAddr
 def getOmegaAddr():
+    # get the IP address of the Omega module
     global omegaAddr
-    if omegaAddr:
+    if omegaAddr: # return the address if it has been memoized
         return omegaAddr
     addr = getAddr()
     omegaBroadcastReceived = False
-    while not omegaBroadcastReceived:
+    while not omegaBroadcastReceived: # loop until we get the Omega Broadcast
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -281,13 +295,15 @@ def getOmegaAddr():
             time.sleep(.1)
             logError("Could not get Omega Server Address. Retrying")
     sock.close()
-    omegaAddr=data.decode("UTF-8").split(" ")[0]
+    omegaAddr=data.decode("UTF-8").split(" ")[0] # TODO : since we use UDP this may be corrupt. We need to add integrity check.
     _ports["omega_tablereq"]=data.decode("UTF-8").split(" ")[1]
     log("Got Omega Address : " + omegaAddr)
     return omegaAddr
 class nodeDiscovery():
     # Interprocess communication
     # served over UDP
+    # this broadcasts the node's ip address and associated ports on the subnet. The omega picks up on these pings
+    #   and adds them to the routing table if the node doesn't exist or updates the routing table with the time of the ping.
     sleepTime=5
     alive=True
     queueSize=20
@@ -295,7 +311,7 @@ class nodeDiscovery():
     jsonInfo=None
     broadcastAddr=getBroadcast()
     def __init__(self, name, *ports):
-        # initializes a multicast UDP socket and broadcasts the nodes ip address to the subnet.
+        # initializes a multicast UDP socket and broadcasts the node's ip address to the subnet.
         #   It also listens for incoming messages
         # ports is a touple : (str(portName), int(portNum))
         self.jsonInfo={}
