@@ -32,7 +32,7 @@ apt-get install -y git python3 unzip make nano
 cd $HOME
 git clone https://github.com/XDerekMaierX/Lambda-Machine.git
 cd Lambda-Machine/
-./<moduleDir>/<module> # ex. :
+./<moduleDir>/<module> # ex. ==> ./lambda-m/LambdaMinion-Server.py
 
 === License
 GNU GENERAL PUBLIC LICENSE
