@@ -20,8 +20,8 @@ import socketserver
 #   Global Variables
 # ==========================
 # subNet="127.0.0.1/32"   # IPv4 localhost
-# subNet="192.168.1.0/24" # IPv4 private network
-subNet="172.17.0.0/16"    # IPv4 Docker
+subNet="192.168.1.0/24" # IPv4 private network
+# subNet="172.17.0.0/16"    # IPv4 Docker
 
 # ==========================
 #   Global Ports
